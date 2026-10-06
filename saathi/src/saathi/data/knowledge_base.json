@@ -1,0 +1,117 @@
+{
+  "_comment": "SYNTHETIC plain-language knowledge base for the RAG retrieval layer. Each document is a pre-approved, non-diagnostic snippet. Retrieved snippets are grounding for the explanation draft; they never change the tier the rule engine assigned. Medical-director sign-off (per Q3) is simulated by the 'approved' flag.",
+  "documents": [
+    {
+      "id": "kb-hemoglobin-what",
+      "analyte": "Hemoglobin",
+      "tiers": ["normal", "borderline", "abnormal", "critical"],
+      "approved": true,
+      "text": "Hemoglobin is the protein in red blood cells that carries oxygen around the body. It is one of the most common things a blood test measures."
+    },
+    {
+      "id": "kb-hemoglobin-low",
+      "analyte": "Hemoglobin",
+      "tiers": ["borderline", "abnormal"],
+      "approved": true,
+      "text": "A hemoglobin value below the usual range is often described as a low result. Low hemoglobin is a common finding and a doctor looks at it alongside your history to understand it."
+    },
+    {
+      "id": "kb-glucose-what",
+      "analyte": "Fasting Glucose",
+      "tiers": ["normal", "borderline", "abnormal", "critical"],
+      "approved": true,
+      "text": "Fasting glucose is the amount of sugar in your blood after not eating for several hours. It is a routine check related to how your body handles sugar."
+    },
+    {
+      "id": "kb-glucose-high",
+      "analyte": "Fasting Glucose",
+      "tiers": ["borderline", "abnormal"],
+      "approved": true,
+      "text": "A fasting glucose above the usual range means the sugar level was higher than typical on this sample. A single reading is only a snapshot and is usually repeated or confirmed before any conclusions are drawn."
+    },
+    {
+      "id": "kb-hba1c-what",
+      "analyte": "HbA1c",
+      "tiers": ["normal", "borderline", "abnormal", "critical"],
+      "approved": true,
+      "text": "HbA1c reflects your average blood sugar over roughly the past three months, rather than a single moment. It is commonly tracked over time."
+    },
+    {
+      "id": "kb-cholesterol-what",
+      "analyte": "Total Cholesterol",
+      "tiers": ["normal", "borderline", "abnormal"],
+      "approved": true,
+      "text": "Cholesterol is a fatty substance in your blood. A lipid profile looks at total cholesterol along with LDL, HDL and triglycerides to give a fuller picture."
+    },
+    {
+      "id": "kb-ldl-high",
+      "analyte": "LDL Cholesterol",
+      "tiers": ["borderline", "abnormal"],
+      "approved": true,
+      "text": "LDL is sometimes called the less favourable type of cholesterol. A higher LDL is something a cardiologist or physician commonly reviews as part of overall heart-health planning."
+    },
+    {
+      "id": "kb-tsh-what",
+      "analyte": "TSH",
+      "tiers": ["normal", "borderline", "abnormal", "critical"],
+      "approved": true,
+      "text": "TSH is a hormone that helps regulate your thyroid gland. Thyroid results are interpreted together and often rechecked over time by an endocrinologist."
+    },
+    {
+      "id": "kb-creatinine-what",
+      "analyte": "Creatinine",
+      "tiers": ["normal", "borderline", "abnormal", "critical"],
+      "approved": true,
+      "text": "Creatinine is a waste product that healthy kidneys filter out of the blood. It is a common marker of how the kidneys are working and is read alongside age and other values."
+    },
+    {
+      "id": "kb-potassium-what",
+      "analyte": "Potassium",
+      "tiers": ["normal", "abnormal", "critical"],
+      "approved": true,
+      "text": "Potassium is an electrolyte that helps your heart and muscles work. Both very high and very low potassium are treated as urgent because of their effect on the heart."
+    },
+    {
+      "id": "kb-potassium-critical",
+      "analyte": "Potassium",
+      "tiers": ["critical"],
+      "approved": true,
+      "text": "A potassium level far outside the safe range is treated as a time-sensitive finding that a clinician needs to review right away."
+    },
+    {
+      "id": "kb-sodium-what",
+      "analyte": "Sodium",
+      "tiers": ["normal", "abnormal", "critical"],
+      "approved": true,
+      "text": "Sodium is an electrolyte that helps balance fluid in the body. Large shifts in sodium are reviewed promptly by a clinician."
+    },
+    {
+      "id": "kb-troponin-what",
+      "analyte": "Troponin I",
+      "tiers": ["normal", "critical"],
+      "approved": true,
+      "text": "Troponin is a protein released when the heart muscle is under strain. A raised troponin is always treated as urgent and reviewed by a clinician immediately."
+    },
+    {
+      "id": "kb-vitamind-what",
+      "analyte": "Vitamin D",
+      "tiers": ["normal", "borderline", "abnormal"],
+      "approved": true,
+      "text": "Vitamin D supports bone health. A lower-than-usual vitamin D is a very common and generally manageable finding that your physician can advise on."
+    },
+    {
+      "id": "kb-general-single-reading",
+      "analyte": "*",
+      "tiers": ["borderline", "abnormal"],
+      "approved": true,
+      "text": "One lab value is a single snapshot. Doctors read it together with your symptoms, history and other results before deciding what it means for you."
+    },
+    {
+      "id": "kb-general-reference-range",
+      "analyte": "*",
+      "tiers": ["normal", "borderline", "abnormal"],
+      "approved": true,
+      "text": "A reference range is the band of values seen in most healthy people of your age and sex. Being just outside it is common and is not the same as a diagnosis."
+    }
+  ]
+}

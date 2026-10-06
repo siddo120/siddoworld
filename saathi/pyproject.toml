@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "saathi"
+version = "0.1.0"
+description = "RAG-based WhatsApp lab-report assistant prototype (Dr Lal PathLabs pitch)"
+requires-python = ">=3.10"
+dependencies = []  # runtime is pure standard library
+
+[project.optional-dependencies]
+claude = ["anthropic>=0.40"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+saathi-demo = "saathi.demo:run"
+saathi-server = "saathi.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+saathi = ["data/*.json", "web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,53 @@
+{
+  "_comment": "Pre-approved message scaffolds. In production every template here carries medical-director sign-off (Q1/Q3). The LLM fills placeholders and arranges retrieved snippets; it never writes outside this frame. {placeholders} are substituted by the explanation layer.",
+  "tier_templates": {
+    "normal": {
+      "headline": "Hi {patient_name}, good news — your {panel} results all look to be within the usual range. 🟢",
+      "body": "{normal_lines}\nNothing here needs follow-up based on these numbers.",
+      "closing": "If you have any questions about the report, just reply here and I'll do my best to explain."
+    },
+    "borderline": {
+      "headline": "Hi {patient_name}, your {panel} results are mostly fine, with a couple of values just slightly outside the usual range. 🟡",
+      "body": "{flagged_lines}\n{grounding}\nValues this close to the edge are common and usually just worth keeping an eye on.",
+      "closing": "This is an explanation of your numbers, not medical advice. If you'd like, I can help you book a consultation."
+    },
+    "abnormal": {
+      "headline": "Hi {patient_name}, most of your {panel} results are in range, but some values are above/below the usual range and worth attention. 🟠",
+      "body": "{flagged_lines}\n{grounding}\nResults like these are commonly reviewed with {specialist}.",
+      "closing": "I can explain what each number measures, but I can't diagnose or advise on treatment — that's for a doctor. Would you like me to help arrange a consultation with {specialist}?"
+    },
+    "critical": {
+      "headline": "Hi {patient_name}, one of your results needs prompt medical attention. 🔴",
+      "body": "A member of our clinical team will call you within 30 minutes to go through it with you and guide next steps. Please keep your phone reachable.",
+      "closing": "If you feel unwell right now, please seek urgent medical care or call your local emergency number. I'm not able to explain this result over chat — a clinician will."
+    },
+    "grey_zone": {
+      "headline": "Hi {patient_name}, thanks — your report has come in.",
+      "body": "A member of our team is reviewing it to make sure you get an accurate explanation. We'll be back to you shortly.",
+      "closing": ""
+    },
+    "uncovered": {
+      "headline": "Hi {patient_name}, thanks — your report has come in.",
+      "body": "Part of this report is a test our assistant isn't set up to explain automatically, so a member of our team will review it and get back to you.",
+      "closing": ""
+    }
+  },
+  "line_formats": {
+    "normal_line": "• {analyte}: {value} {unit} — within the usual range ({range}).",
+    "borderline_line": "• {analyte}: {value} {unit} — slightly {direction} the usual range ({range}).",
+    "abnormal_line": "• {analyte}: {value} {unit} — {direction} the usual range ({range}).",
+    "critical_line": "• {analyte}: flagged for urgent clinical review."
+  },
+  "conversation": {
+    "medical_advice_refusal": "That's an important question, and it's exactly the kind of thing a doctor should answer rather than me — I can explain what your numbers mean, but I can't advise on medication, treatment or what you should do. Would you like me to connect you with a doctor?",
+    "human_handoff": "Of course — I'm connecting you with a member of our team now. They'll pick up this conversation shortly. 🙏",
+    "dispute_recheck": "Thanks for flagging that — let me re-check your report. {recheck_result} If that still doesn't sit right with you, I'd rather have a doctor go through it with you properly.",
+    "dispute_exhausted": "I understand this is still unclear, and I don't want to keep going in circles on something this important. The best next step is a short consultation with a relevant doctor who can look at everything together. Shall I help you book one?",
+    "fallback": "I can help explain the values in your lab report in plain language. What would you like to understand — a specific result, or the report overall?",
+    "greeting": "Hi {patient_name}, I'm the Dr Lal PathLabs report assistant. I can explain your lab results in plain language. I can't diagnose or give medical advice — for that I'll connect you with a doctor."
+  },
+  "reminders": {
+    "due_soon": "Hi {patient_name}, a friendly reminder from Dr Lal PathLabs: your {test} is due for a repeat around {due_date}. Staying on schedule helps your doctor track things properly. Reply BOOK and I'll help you set it up. 🗓️",
+    "overdue": "Hi {patient_name}, your {test} repeat was due around {due_date} and we don't have a recent result on file yet. It's worth getting this done soon — reply BOOK and I'll help arrange it, or reply STOP to pause reminders."
+  }
+}

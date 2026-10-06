@@ -1,0 +1,86 @@
+{
+  "_comment": "SYNTHETIC sample reports for the demo. Each maps to a Q1 scenario so the behaviour is easy to see end to end.",
+  "reports": [
+    {
+      "report_id": "RPT-1001",
+      "scenario": "S1 — all normal",
+      "patient": {"name": "Anita", "age": 34, "sex": "F", "phone": "+91-90000-00001", "chronic": false},
+      "panel": "Complete Blood Count",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Hemoglobin", "value": 13.2, "unit": "g/dL"},
+        {"analyte": "Platelet Count", "value": 250, "unit": "x10^3/uL"},
+        {"analyte": "WBC Count", "value": 7.1, "unit": "x10^3/uL"}
+      ]
+    },
+    {
+      "report_id": "RPT-1002",
+      "scenario": "S2 — borderline",
+      "patient": {"name": "Rahul", "age": 41, "sex": "M", "phone": "+91-90000-00002", "chronic": false},
+      "panel": "Diabetes Screen",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Fasting Glucose", "value": 108, "unit": "mg/dL"},
+        {"analyte": "HbA1c", "value": 5.9, "unit": "%"}
+      ]
+    },
+    {
+      "report_id": "RPT-1003",
+      "scenario": "S3 — abnormal, non-critical (high cholesterol)",
+      "patient": {"name": "Meera", "age": 52, "sex": "F", "phone": "+91-90000-00003", "chronic": true},
+      "panel": "Lipid Profile",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Total Cholesterol", "value": 255, "unit": "mg/dL"},
+        {"analyte": "LDL Cholesterol", "value": 150, "unit": "mg/dL"},
+        {"analyte": "HDL Cholesterol", "value": 58, "unit": "mg/dL"},
+        {"analyte": "Triglycerides", "value": 170, "unit": "mg/dL"}
+      ]
+    },
+    {
+      "report_id": "RPT-1004",
+      "scenario": "S4 — critical value (potassium)",
+      "patient": {"name": "Suresh", "age": 67, "sex": "M", "phone": "+91-90000-00004", "chronic": true},
+      "panel": "Electrolytes",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Potassium", "value": 6.6, "unit": "mmol/L"},
+        {"analyte": "Sodium", "value": 139, "unit": "mmol/L"},
+        {"analyte": "Creatinine", "value": 1.2, "unit": "mg/dL"}
+      ]
+    },
+    {
+      "report_id": "RPT-1005",
+      "scenario": "S11 — multiple significantly abnormal → grey-zone review",
+      "patient": {"name": "Farah", "age": 59, "sex": "F", "phone": "+91-90000-00005", "chronic": true},
+      "panel": "Metabolic Panel",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Fasting Glucose", "value": 210, "unit": "mg/dL"},
+        {"analyte": "Creatinine", "value": 1.5, "unit": "mg/dL"},
+        {"analyte": "LDL Cholesterol", "value": 175, "unit": "mg/dL"}
+      ]
+    },
+    {
+      "report_id": "RPT-1006",
+      "scenario": "S10 — test not covered by the rule set",
+      "patient": {"name": "Deepak", "age": 45, "sex": "M", "phone": "+91-90000-00006", "chronic": false},
+      "panel": "Special Panel",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Hemoglobin", "value": 14.5, "unit": "g/dL"},
+        {"analyte": "Serum Ferritin", "value": 310, "unit": "ng/mL"}
+      ]
+    },
+    {
+      "report_id": "RPT-1007",
+      "scenario": "S4 — critical value (troponin)",
+      "patient": {"name": "Imran", "age": 61, "sex": "M", "phone": "+91-90000-00007", "chronic": false},
+      "panel": "Cardiac Markers",
+      "collected_at": "2026-10-04",
+      "results": [
+        {"analyte": "Troponin I", "value": 0.9, "unit": "ng/mL"}
+      ]
+    }
+  ]
+}

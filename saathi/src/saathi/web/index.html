@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saathi — Dr Lal PathLabs assistant</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar: pick a report -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <h1>Saathi</h1>
+          <p>Report assistant · prototype</p>
+        </div>
+      </div>
+      <p class="hint">Pick a report to send over WhatsApp. The <b>rule engine</b> classifies it, then the <b>RAG layer</b> drafts the reply.</p>
+      <ul id="reportList" class="reports"></ul>
+      <div class="legend">
+        <span><i class="dot normal"></i>normal</span>
+        <span><i class="dot borderline"></i>borderline</span>
+        <span><i class="dot abnormal"></i>abnormal</span>
+        <span><i class="dot critical"></i>critical</span>
+        <span><i class="dot grey_zone"></i>review</span>
+      </div>
+    </aside>
+
+    <!-- Chat -->
+    <main class="chat">
+      <header class="chat-header">
+        <div class="avatar">DL</div>
+        <div class="who">
+          <strong>Dr Lal PathLabs</strong>
+          <small id="chatSub">Select a report to begin</small>
+        </div>
+        <button id="auditToggle" class="ghost" title="Show the audit trail">Why?</button>
+      </header>
+
+      <div id="messages" class="messages">
+        <div class="empty">
+          <p>👈 Choose a sample report to see the assistant explain it.</p>
+        </div>
+      </div>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <input id="input" type="text" placeholder="Reply as the patient… (try: 'should I stop my medication?')" disabled />
+        <button id="send" type="submit" disabled>Send</button>
+      </form>
+    </main>
+
+    <!-- Audit panel -->
+    <aside id="auditPanel" class="audit hidden">
+      <h2>Audit trail</h2>
+      <p class="audit-note">What the deterministic engine decided — independent of the wording.</p>
+      <div id="auditBody"><p class="muted">No report processed yet.</p></div>
+    </aside>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
