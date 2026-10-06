@@ -147,7 +147,11 @@ async function sendMessage(text) {
     body: JSON.stringify({ session_id: state.sessionId, message: text }),
   });
   if (res.error) { addSystem("⚠️ " + res.error); return; }
-  addBubble(res.text, "in", `intent: ${res.intent}`);
+  let meta = `intent: ${res.intent}`;
+  if (res.from_library && res.retrieved_ids && res.retrieved_ids.length) {
+    meta += ` · 📚 answered from ` + res.retrieved_ids.map((id) => `<span class="rag-id">${id}</span>`).join(" ");
+  }
+  addBubble(res.text, "in", meta);
   if (res.escalated) addBanner("🤝 Handed off to a human agent.", "handoff");
 }
 

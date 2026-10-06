@@ -17,6 +17,12 @@ from typing import Optional
 
 from .corpus import Corpus, get_corpus
 from .models import ReportClassification, Tier
+from .retrieval import Retriever, get_retriever
+
+# Minimum retrieval score for a follow-up answer to count as "in the approved
+# library". Below this, the AI hands off rather than guess. Tuned so on-topic
+# questions (~0.26+) answer and off-topic ones (~0.17-) hand off.
+ANSWER_THRESHOLD = 0.22
 
 
 class Intent(str, Enum):
@@ -55,6 +61,8 @@ class Reply:
     intent: Intent
     escalated: bool = False       # handed to a human
     offered_doctor: bool = False
+    from_library: bool = False            # answered from an approved snippet
+    retrieved_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -64,8 +72,13 @@ class ConversationSession:
     patient_name: str
     classification: Optional[ReportClassification] = None
     corpus: Corpus = field(default_factory=get_corpus)
+    retriever: Retriever = field(default_factory=get_retriever)
     recheck_used: bool = False
     handed_off: bool = False
+
+    @property
+    def _report_analytes(self) -> list[str]:
+        return [a.analyte for a in self.classification.analytes] if self.classification else []
 
     @property
     def _conv(self) -> dict:
@@ -115,4 +128,19 @@ class ConversationSession:
                 intent,
             )
 
-        return Reply(conv["fallback"], intent)
+        # General follow-up: answer ONLY from the approved library (RAG), else
+        # hand to a person. The AI never composes its own medical wording.
+        return self._answer_from_library(message, conv)
+
+    def _answer_from_library(self, message: str, conv: dict) -> Reply:
+        hits = self.retriever.search(message, boost_analytes=self._report_analytes, k=2)
+        if hits and hits[0].score >= ANSWER_THRESHOLD:
+            answer = hits[0].text
+            # Add a second snippet only if it is also clearly relevant.
+            if len(hits) > 1 and hits[1].score >= ANSWER_THRESHOLD:
+                answer = answer + " " + hits[1].text
+            used = [h.id for h in hits if h.score >= ANSWER_THRESHOLD]
+            text = conv["library_answer"].format(answer=answer)
+            return Reply(text, Intent.GENERAL, from_library=True, retrieved_ids=used)
+        # Nothing approved matched -> decline and offer a person, never guess.
+        return Reply(conv["no_library_answer"], Intent.GENERAL, offered_doctor=True)

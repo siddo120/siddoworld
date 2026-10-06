@@ -44,6 +44,8 @@
     "dispute_recheck": "Thanks for flagging that — let me re-check your report. {recheck_result} If that still doesn't sit right with you, I'd rather have a doctor go through it with you properly.",
     "dispute_exhausted": "I understand this is still unclear, and I don't want to keep going in circles on something this important. The best next step is a short consultation with a relevant doctor who can look at everything together. Shall I help you book one?",
     "fallback": "I can help explain the values in your lab report in plain language. What would you like to understand — a specific result, or the report overall?",
+    "library_answer": "{answer}\n\nThis is a general explanation from our approved information, not medical advice. If you'd like more, I can connect you with a doctor.",
+    "no_library_answer": "That's a fair question, but I don't have a doctor-approved answer for it, so I won't guess. I can only explain the results in your report from our approved information — if it's about your health, I can connect you with a doctor.",
     "greeting": "Hi {patient_name}, I'm the Dr Lal PathLabs report assistant. I can explain your lab results in plain language. I can't diagnose or give medical advice — for that I'll connect you with a doctor."
   },
   "reminders": {

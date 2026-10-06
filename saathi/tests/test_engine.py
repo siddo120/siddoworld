@@ -157,6 +157,24 @@ def test_medical_advice_refused():
     assert r.offered_doctor and "can't advise" in r.text
 
 
+def test_followup_answered_from_approved_library():
+    # A relevant question is answered from an approved snippet (RAG), not invented.
+    s = ConversationSession(patient_name="Test", classification=classify_report(_report([("Total Cholesterol", 255, "mg/dL")])))
+    r = s.handle("what is cholesterol?")
+    assert r.from_library is True
+    assert r.retrieved_ids  # names the snippet(s) it used
+    assert not r.escalated
+
+
+def test_followup_off_topic_declines_and_offers():
+    # Nothing in the approved library matches -> decline and offer a person, never guess.
+    s = ConversationSession(patient_name="Test", classification=classify_report(_report([("Hemoglobin", 15, "g/dL")])))
+    r = s.handle("who won the cricket match last night")
+    assert r.from_library is False
+    assert r.offered_doctor is True
+    assert "won't guess" in r.text
+
+
 # ---- reminders ----
 def test_reminder_due_soon_vs_overdue():
     soon = ReminderState("Test", "HbA1c", date.today() + timedelta(days=3))

@@ -138,7 +138,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         reply = session.handle(payload.get("message", ""))
         self._json({"text": reply.text, "intent": reply.intent.value,
-                    "escalated": reply.escalated, "offered_doctor": reply.offered_doctor})
+                    "escalated": reply.escalated, "offered_doctor": reply.offered_doctor,
+                    "from_library": reply.from_library, "retrieved_ids": reply.retrieved_ids})
 
     def _reminder(self, payload: dict) -> None:
         rid = payload.get("report_id", "")

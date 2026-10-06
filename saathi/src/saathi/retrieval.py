@@ -61,6 +61,27 @@ class Retriever:
         nb = math.sqrt(sum(v * v for v in b.values()))
         return dot / (na * nb) if na and nb else 0.0
 
+    def search(self, query: str, boost_analytes: list[str] | None = None, k: int = 3) -> list[Snippet]:
+        """Free-text search over approved snippets, ignoring tier.
+
+        Used to answer a patient's follow-up question *only* from the approved
+        library. Snippets about an analyte in the patient's own report get a
+        small boost so answers stay contextual.
+        """
+        boost = {a.strip().lower() for a in (boost_analytes or [])}
+        query_vec = self._vec(_tokenize(query))
+        results: list[Snippet] = []
+        for doc in self.docs:
+            if not doc.get("approved", False):
+                continue
+            score = self._cosine(query_vec, self._vec(self._tokens[doc["id"]]))
+            doc_analyte = doc.get("analyte", "").strip().lower()
+            if doc_analyte != "*" and doc_analyte in boost:
+                score += 0.1
+            results.append(Snippet(id=doc["id"], analyte=doc.get("analyte", ""), text=doc["text"], score=score))
+        results.sort(key=lambda s: s.score, reverse=True)
+        return results[:k]
+
     def retrieve(self, analytes: list[str], tier: Tier, k: int = 3) -> list[Snippet]:
         """Top-k approved snippets for these analytes at this tier."""
         want = {a.strip().lower() for a in analytes}
