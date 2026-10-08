@@ -1,0 +1,960 @@
+<title>Dream11 Commercial Engine</title>
+<meta name="description" content="Interactive demo of a single AI matching engine powering two Dream11 revenue surfaces: private-league sponsorships and ad-yield optimization.">
+<style>
+  /* ============================================================
+     Layout concept: operated-not-read product console. Sticky top
+     bar + tab nav; each surface is a work panel (controls left/top,
+     live results below). One shared "engine" visual thesis ties the
+     two revenue surfaces together.
+     ============================================================ */
+  :root{
+    /* palette — warm-neutral ground, confident crimson accent (Dream11 energy),
+       teal as the second/positive hue, semantic status kept separate */
+    --bg:#f6f3ee;
+    --surface:#fffdf9;
+    --surface-2:#f0ece4;
+    --ink:#1b1714;
+    --ink-2:#5c5349;
+    --ink-3:#8a7f72;
+    --line:#e3ddd2;
+    --accent:#d7263d;
+    --accent-ink:#8c1526;
+    --accent-soft:#fbe4e7;
+    --teal:#1b998b;
+    --teal-soft:#dcf1ee;
+    --gold:#c98a12;
+    --good:#2f8f4e;
+    --warn:#c98a12;
+    --bad:#c0392b;
+    --shadow:0 1px 2px rgba(27,23,20,.06), 0 8px 24px rgba(27,23,20,.06);
+    --radius:14px;
+    --radius-s:9px;
+    --maxw:1160px;
+    --f-display:"Archivo","Archivo Black",system-ui,sans-serif;
+    --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#161311; --surface:#211d1a; --surface-2:#2b2622; --ink:#f4efe8;
+    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff5869;
+    --accent-ink:#ff8a95; --accent-soft:#3a1e22; --teal:#39c3b2; --teal-soft:#15332f;
+    --gold:#e3af4b; --good:#54c178; --warn:#e3af4b; --bad:#ef6a5a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#161311; --surface:#211d1a; --surface-2:#2b2622; --ink:#f4efe8;
+    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff5869;
+    --accent-ink:#ff8a95; --accent-soft:#3a1e22; --teal:#39c3b2; --teal-soft:#15332f;
+    --gold:#e3af4b; --good:#54c178; --warn:#e3af4b; --bad:#ef6a5a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:var(--f-body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    font-size:15px;
+  }
+  h1,h2,h3,h4{font-family:var(--f-display); font-weight:800; line-height:1.1; text-wrap:balance; margin:0}
+  p{margin:0}
+  a{color:var(--accent-ink)}
+  button{font-family:inherit}
+  .mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar{max-width:var(--maxw); margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:10px; margin-right:auto}
+  .logo{width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--accent),var(--accent-ink));
+    display:grid; place-items:center; color:#fff; font-family:var(--f-display); font-weight:800; font-size:18px; flex:none}
+  .brand b{font-family:var(--f-display); font-size:16px; letter-spacing:-.01em; display:block}
+  .brand span{font-size:11px; color:var(--ink-3); letter-spacing:.04em; text-transform:uppercase}
+  nav{display:flex; gap:4px; flex-wrap:wrap}
+  .tab{border:1px solid transparent; background:transparent; color:var(--ink-2); padding:7px 12px; border-radius:999px;
+    font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px}
+  .tab:hover{color:var(--ink); background:var(--surface-2)}
+  .tab[aria-selected="true"]{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .tab .dot{width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.55}
+  .icon-btn{border:1px solid var(--line); background:var(--surface); color:var(--ink-2); width:34px; height:34px;
+    border-radius:9px; cursor:pointer; font-size:15px; display:grid; place-items:center}
+  .icon-btn:hover{color:var(--ink)}
+
+  /* ---------- layout ---------- */
+  main{max-width:var(--maxw); margin:0 auto; padding:22px 16px 64px}
+  section[hidden]{display:none}
+  .eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-ink); font-weight:700}
+  .lede{color:var(--ink-2); max-width:65ch}
+  .grid{display:grid; gap:16px}
+  @media(min-width:720px){ .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
+  .card.flush{padding:0; overflow:hidden}
+  .pad{padding:18px}
+  .divider{height:1px; background:var(--line); border:0; margin:0}
+  .muted{color:var(--ink-3)}
+  .small{font-size:12.5px}
+
+  /* stat tiles */
+  .tiles{display:grid; gap:12px; grid-template-columns:repeat(2,1fr)}
+  @media(min-width:720px){ .tiles.t4{grid-template-columns:repeat(4,1fr)} .tiles.t3{grid-template-columns:repeat(3,1fr)} }
+  .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-s); padding:14px}
+  .tile .k{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+  .tile .v{font-family:var(--f-display); font-size:26px; font-weight:800; margin-top:4px; letter-spacing:-.01em}
+  .tile .s{font-size:12px; color:var(--ink-2); margin-top:3px}
+  .tile.hot{border-color:var(--accent); background:linear-gradient(180deg,var(--accent-soft),var(--surface))}
+  .tile.hot .v{color:var(--accent-ink)}
+
+  /* pills / tags */
+  .pill{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px;
+    background:var(--surface-2); color:var(--ink-2); letter-spacing:.02em}
+  .pill.green{background:var(--teal-soft); color:var(--teal)}
+  .pill.warn{background:#fbf0d8; color:var(--gold)}
+  .pill.accent{background:var(--accent-soft); color:var(--accent-ink)}
+  :root[data-theme="dark"] .pill.warn{background:#3a2f14}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .pill.warn{background:#3a2f14} }
+
+  /* buttons */
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:9px 14px; border-radius:10px;
+    font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px}
+  .btn:hover{border-color:var(--ink-3)}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn.primary:hover{background:var(--accent-ink); border-color:var(--accent-ink)}
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+
+  /* selector chips */
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{border:1.5px solid var(--line); background:var(--surface); border-radius:11px; padding:9px 12px; cursor:pointer;
+    display:flex; align-items:center; gap:9px; font-size:13px; font-weight:600; color:var(--ink)}
+  .chip:hover{border-color:var(--ink-3)}
+  .chip[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .swatch{width:16px; height:16px; border-radius:5px; flex:none; border:1px solid rgba(0,0,0,.12)}
+
+  /* league rows */
+  .lrow{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; padding:12px 16px; border-top:1px solid var(--line)}
+  .lrow:first-child{border-top:0}
+  .rank{font-family:var(--f-display); font-weight:800; font-size:14px; color:var(--ink-3); width:26px; text-align:right}
+  .lname{font-weight:700; font-size:13.5px}
+  .lmeta{font-size:11.5px; color:var(--ink-3); margin-top:2px; display:flex; gap:10px; flex-wrap:wrap}
+  .scorebadge{font-family:var(--f-display); font-weight:800; font-size:19px; text-align:right; min-width:42px}
+  .bars{display:flex; gap:3px; margin-top:6px}
+  .barseg{height:5px; border-radius:3px; background:var(--surface-2); flex:1; overflow:hidden}
+  .barseg i{display:block; height:100%; background:var(--teal); border-radius:3px}
+
+  /* generic track/meter */
+  .track{height:8px; border-radius:5px; background:var(--surface-2); overflow:hidden}
+  .track i{display:block; height:100%; border-radius:5px; background:var(--accent)}
+
+  /* creative mock */
+  .skin{border-radius:12px; padding:16px; color:#fff; position:relative; overflow:hidden; min-height:120px; display:flex; flex-direction:column; justify-content:space-between}
+  .skin .tag{font-size:10px; letter-spacing:.14em; text-transform:uppercase; opacity:.85; font-weight:700}
+  .skin h4{font-size:18px; color:#fff}
+  .skin .foot{display:flex; align-items:center; justify-content:space-between; font-size:12px; opacity:.95}
+  .stickers{display:flex; gap:8px; flex-wrap:wrap}
+  .sticker{width:40px; height:40px; border-radius:11px; display:grid; place-items:center; font-size:20px; border:1px solid var(--line); background:var(--surface-2)}
+
+  /* heatmap */
+  .heat{display:grid; gap:3px; overflow-x:auto}
+  .hcell{min-width:54px; height:40px; border-radius:6px; display:grid; place-items:center; font-size:11px; font-weight:700; color:#0c2b27}
+  .hhead{font-size:10.5px; color:var(--ink-3); font-weight:700; display:flex; align-items:flex-end; min-height:34px}
+  .hrow-label{font-size:11.5px; font-weight:600; color:var(--ink-2); display:flex; align-items:center; padding-right:8px}
+
+  /* recommendation */
+  .rec{display:flex; gap:12px; align-items:flex-start; padding:13px 16px; border-top:1px solid var(--line)}
+  .rec:first-child{border-top:0}
+  .rec .idx{width:24px; height:24px; border-radius:7px; background:var(--accent-soft); color:var(--accent-ink); font-weight:800; display:grid; place-items:center; font-size:12px; flex:none; font-family:var(--f-display)}
+
+  /* sliders */
+  .ctrl{display:flex; flex-direction:column; gap:7px; padding:12px 0; border-top:1px solid var(--line)}
+  .ctrl:first-child{border-top:0; padding-top:0}
+  .ctrl .lab{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; font-weight:600}
+  .ctrl .val{font-family:var(--f-mono); color:var(--accent-ink); font-weight:600}
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:5px; background:var(--surface-2); outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); cursor:pointer; border:3px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  input[type=range]::-moz-range-thumb{width:18px; height:18px; border-radius:50%; background:var(--accent); cursor:pointer; border:3px solid var(--surface)}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* engine diagram */
+  .engine{display:grid; gap:12px; align-items:center}
+  @media(min-width:760px){ .engine{grid-template-columns:1fr auto 1fr} }
+  .engbox{border:1.5px dashed var(--line); border-radius:12px; padding:14px; text-align:center}
+  .engcore{background:linear-gradient(135deg,var(--accent),var(--accent-ink)); color:#fff; border-radius:14px; padding:16px 18px; text-align:center; box-shadow:var(--shadow)}
+  .engcore b{font-family:var(--f-display); font-size:15px}
+  .arrow{color:var(--ink-3); text-align:center; font-weight:700}
+
+  /* flow steps */
+  ol.flow{list-style:none; counter-reset:s; margin:0; padding:0; display:grid; gap:10px}
+  ol.flow li{counter-increment:s; display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start; font-size:13.5px; color:var(--ink-2)}
+  ol.flow li::before{content:counter(s); font-family:var(--f-display); font-weight:800; font-size:12px; width:24px; height:24px; border-radius:7px;
+    background:var(--surface-2); color:var(--ink); display:grid; place-items:center}
+  ol.flow li b{color:var(--ink)}
+
+  /* tag legend */
+  .tagdot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle}
+  .proof{display:inline-flex; gap:5px; align-items:center; font-size:11px; font-weight:700; color:var(--ink-3)}
+
+  .section-head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:4px}
+  .stack{display:flex; flex-direction:column; gap:20px}
+  .row-between{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+
+  .callout{border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0; padding:13px 15px; font-size:13.5px}
+  .callout.warn{border-left-color:var(--gold); background:#fbf0d8}
+  :root[data-theme="dark"] .callout.warn{background:#2e2611}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .callout.warn{background:#2e2611} }
+
+  table.econ{width:100%; border-collapse:collapse; font-size:13.5px}
+  table.econ td{padding:9px 6px; border-top:1px solid var(--line)}
+  table.econ tr:first-child td{border-top:0}
+  table.econ td:last-child{text-align:right; font-variant-numeric:tabular-nums; font-weight:600}
+  table.econ tr.total td{border-top:2px solid var(--ink-3); font-weight:800; font-family:var(--f-display); font-size:15px}
+
+  footer{max-width:var(--maxw); margin:0 auto; padding:0 16px 40px; color:var(--ink-3); font-size:12px}
+  .legendbar{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-3)}
+  svg text{fill:var(--ink-2)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  @media (prefers-reduced-motion:no-preference){ .fade{animation:f .3s ease both} @keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1}} }
+</style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo">D</div>
+      <div>
+        <b>Dream11 Commercial Engine</b>
+        <span>One AI engine · two revenue surfaces</span>
+      </div>
+    </div>
+    <nav id="nav" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" data-tab="overview" aria-selected="true"><span class="dot"></span>The bet</button>
+      <button class="tab" role="tab" data-tab="surface-a" aria-selected="false"><span class="dot"></span>League sponsorships</button>
+      <button class="tab" role="tab" data-tab="surface-b" aria-selected="false"><span class="dot"></span>Ad-yield</button>
+      <button class="tab" role="tab" data-tab="economics" aria-selected="false"><span class="dot"></span>Unit economics</button>
+    </nav>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main>
+  <!-- ========================= OVERVIEW ========================= -->
+  <section id="overview" class="stack fade">
+    <div>
+      <p class="eyebrow">Mock client call · Round 2 · Dream11</p>
+      <h1 style="font-size:clamp(28px,5vw,40px); margin:8px 0 10px; max-width:16ch">Finishing the bet you already won.</h1>
+      <p class="lede" style="font-size:16px">You already proved an AI-led, legal, no-stakes product earns <b>2.5&times; the normal ad rate</b> in a pilot &mdash; and never scaled it. This is one matching engine feeding two income lines: private-league sponsorships, and ad-yield optimization for the advertisers you already have.</p>
+    </div>
+
+    <div class="tiles t4">
+      <div class="tile hot"><div class="k">Season 1 net new profit</div><div class="v">₹4.7&ndash;7.3cr</div><div class="s">after build + running cost</div></div>
+      <div class="tile"><div class="k">Implied margin</div><div class="v">93&ndash;96%</div><div class="s">one shared, fixed-cost engine</div></div>
+      <div class="tile"><div class="k">One-time build</div><div class="v">₹16.6L</div><div class="s">paid once · case worked example</div></div>
+      <div class="tile"><div class="k">Proof in hand</div><div class="v">2.5&times;</div><div class="s">pilot ad rate · Exhibit 4</div></div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">The thesis</p>
+      <h2 style="font-size:20px; margin:6px 0 16px">Why one engine, not three ideas</h2>
+      <div class="engine">
+        <div class="engbox">
+          <div class="pill accent">Surface A input</div>
+          <p class="small" style="margin-top:8px"><b>Private leagues</b><br><span class="muted">size · chat activity · category signals · consent</span></p>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="engbox">
+          <div class="pill accent">Surface B input</div>
+          <p class="small" style="margin-top:8px"><b>Ad-serving logs</b><br><span class="muted">creator · segment · match-moment performance</span></p>
+        </div>
+      </div>
+      <div style="display:grid; place-items:center; margin:14px 0">
+        <div class="engcore"><b>AI matching / optimization engine</b><br><span style="font-size:12px; opacity:.9">match the right buyer to the right audience, automatically</span></div>
+      </div>
+      <div class="engine">
+        <div class="engbox" style="border-style:solid; border-color:var(--teal)">
+          <div class="pill green">Output A</div>
+          <p class="small" style="margin-top:8px"><b>Sponsorship packages</b> &mdash; scored cohorts + auto-built creative, sold to brands</p>
+        </div>
+        <div class="arrow" aria-hidden="true">₹</div>
+        <div class="engbox" style="border-style:solid; border-color:var(--teal)">
+          <div class="pill green">Output B</div>
+          <p class="small" style="margin-top:8px"><b>Yield recommendations</b> &mdash; buy-this-next guidance that lifts existing campaigns</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g3">
+      <div class="card">
+        <div class="pill accent">1 · One bet</div>
+        <h3 style="font-size:16px; margin:10px 0 6px">Not three competing ideas</h3>
+        <p class="small muted">One engine, two income lines. A single team and a single build budget &mdash; not three unrelated bets fighting for funding.</p>
+      </div>
+      <div class="card">
+        <div class="pill accent">2 · Protects the asset</div>
+        <h3 style="font-size:16px; margin:10px 0 6px">The thing users would miss</h3>
+        <p class="small muted">Community said private leagues are the one thing users won't give up. This monetizes them without changing the experience inside a league.</p>
+      </div>
+      <div class="card">
+        <div class="pill accent">3 · The CFO's number</div>
+        <h3 style="font-size:16px; margin:10px 0 6px">Revenue per user, for real</h3>
+        <p class="small muted">The only line in the room backed by a real pilot (2.5&times;) and a known ad-tech benchmark (~10% take rate) &mdash; not a projection from nothing.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <b>Honest scope, said before the CFO does.</b> This is the highest-margin, fastest-compounding, most de-risked AI revenue line available from the case &mdash; the credible first domino in a portfolio, not a single fix for the ₹37&ndash;53cr/month burn. See the scale check on the Unit Economics tab.
+    </div>
+
+    <div class="row-between">
+      <p class="small muted">Explore the working engine &rarr;</p>
+      <div class="chips">
+        <button class="btn primary" data-goto="surface-a">Run league matching</button>
+        <button class="btn" data-goto="surface-b">See yield optimization</button>
+        <button class="btn" data-goto="economics">Open the P&amp;L model</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= SURFACE A ========================= -->
+  <section id="surface-a" class="stack" hidden>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Surface A · the proven bet</p>
+        <h2 style="font-size:24px; margin-top:4px">Private-league sponsorships</h2>
+        <p class="lede small">Pick a brand. The engine scores every private league on brand-fit, bundles the best into a sellable cohort, and auto-builds the sponsorship creative &mdash; work a person would otherwise do by hand, league by league.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row-between" style="margin-bottom:12px">
+        <div><p class="eyebrow">Step 1 · choose a brand to match</p></div>
+        <span class="pill">Demo population: <span id="a-pop" class="num"></span> scored leagues</span>
+      </div>
+      <div class="chips" id="brandchips"></div>
+    </div>
+
+    <div class="grid g3">
+      <div class="card" style="grid-column:1/-1">
+        <div class="row-between" style="margin-bottom:10px">
+          <p class="eyebrow">Step 2 · league scoring engine</p>
+          <label class="small muted" style="display:flex; align-items:center; gap:8px">
+            Fit threshold <input type="range" id="thresh" min="40" max="85" value="60" style="width:120px"> <span id="threshv" class="mono">60</span>
+          </label>
+        </div>
+        <p class="small muted" style="margin-bottom:12px">Ranked by brand-fit. Each score breaks down into the four signals the engine weighs &mdash; <span class="proof"><span class="barseg" style="width:26px;display:inline-block"><i style="width:100%"></i></span> affinity · engagement · size · region</span>. Cold-start leagues (&lt;2 weeks of chat) are flagged and discounted.</p>
+        <div id="leaguelist" class="card flush" style="box-shadow:none"></div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <p class="eyebrow">Step 3 · the sellable cohort</p>
+        <h3 style="font-size:16px; margin:6px 0 2px" id="cohort-title">&mdash;</h3>
+        <p class="small muted" style="margin-bottom:12px">Matching leagues are bundled into one brand-fit cohort (a package sold for a season). Up to ~500 similar leagues per package.</p>
+        <div class="tiles" id="cohort-tiles"></div>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Step 4 · auto-generated creative</p>
+        <p class="small muted" style="margin:6px 0 12px">Generated per brand per cohort &mdash; league skin, chat stickers, matchday graphic. A human reviews for brand safety before anything goes live.</p>
+        <div id="creative"></div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <p class="eyebrow">Step 5 · opt-in consent</p>
+        <p class="small muted" style="margin:6px 0 12px">Nothing changes in a league without the admin's consent. New consent is captured here &mdash; no legacy data is used.</p>
+        <div id="consent"></div>
+        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn" id="requestconsent">Request consent from cohort</button>
+          <button class="btn primary" id="golive" disabled>Pass brand-safety &amp; go live</button>
+        </div>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Step 6 · brand performance dashboard</p>
+        <p class="small muted" style="margin:6px 0 12px">What the sponsoring brand sees once the campaign is live.</p>
+        <div id="branddash"><p class="muted small" style="padding:20px 0; text-align:center">Go live to populate the brand's live dashboard.</p></div>
+      </div>
+    </div>
+
+    <div class="callout"><b>Where it breaks (flagged, not hidden):</b> brand-new leagues can't be scored for ~2 weeks until chat history builds. Scoring thousands of leagues at once on the busiest match nights is the one real engineering challenge.</div>
+  </section>
+
+  <!-- ========================= SURFACE B ========================= -->
+  <section id="surface-b" class="stack" hidden>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Surface B · the benchmark-backed bet</p>
+        <h2 style="font-size:24px; margin-top:4px">Ad-yield optimization</h2>
+        <p class="lede small">The same engine, pointed at ad-serving logs you already collect. It finds which creator &times; segment &times; match-moment actually performed &mdash; and tells the account manager where to place the next rupee.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">Step 1 · choose an existing advertiser</p>
+      <div class="chips" id="advchips" style="margin-top:10px"></div>
+    </div>
+
+    <div class="grid g4">
+      <div class="tile"><div class="k">Current blended ROAS</div><div class="v" id="b-cur">&mdash;</div><div class="s">legacy even spread</div></div>
+      <div class="tile hot"><div class="k">Optimized ROAS</div><div class="v" id="b-opt">&mdash;</div><div class="s">engine reallocation</div></div>
+      <div class="tile"><div class="k">Projected lift</div><div class="v" id="b-lift">&mdash;</div><div class="s">on the same budget</div></div>
+      <div class="tile"><div class="k">Incremental revenue</div><div class="v" id="b-inc">&mdash;</div><div class="s">season · same spend</div></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <p class="eyebrow">Step 2 · performance analysis</p>
+        <h3 style="font-size:15px; margin:6px 0 2px">ROAS by audience segment &times; match-moment</h3>
+        <p class="small muted" style="margin-bottom:12px">Darker = higher return. Reads off the advertiser's own historical campaigns.</p>
+        <div id="heatmap"></div>
+        <div class="legendbar" style="margin-top:12px; align-items:center">
+          <span>Lower</span>
+          <span id="heatscale" style="flex:1; height:10px; border-radius:5px; min-width:80px"></span>
+          <span>Higher ROAS</span>
+        </div>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Step 3 · recommendation layer</p>
+        <h3 style="font-size:15px; margin:6px 0 2px">Buy this next</h3>
+        <p class="small muted" style="margin-bottom:6px">Surfaced to the account manager, who keeps the pricing conversation. Phase 2 auto-applies these live during a match.</p>
+        <div id="recs" class="card flush" style="box-shadow:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">Step 4 · before / after the brand sees</p>
+      <div id="beforeafter" style="margin-top:12px"></div>
+    </div>
+
+    <div class="callout"><b>Where it breaks (flagged):</b> a brand's very first campaign has no history to learn from (cold-start). Live, real-time reallocation across 1cr+ concurrent users on match night is the harder phase-2 version &mdash; the pilot deliberately starts at analysis + recommendations.</div>
+  </section>
+
+  <!-- ========================= ECONOMICS ========================= -->
+  <section id="economics" class="stack" hidden>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">The number the CFO asked for</p>
+        <h2 style="font-size:24px; margin-top:4px">Unit economics &amp; Season-1 P&amp;L</h2>
+        <p class="lede small">Drag the assumptions. Every output recomputes live. Defaults match the PRD's Season-1 (IPL 2027) figures.</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <p class="eyebrow">Assumptions · drag to test</p>
+        <h3 style="font-size:14px; margin:12px 0 4px; color:var(--accent-ink)">Surface A — sponsorships</h3>
+        <div class="ctrl"><div class="lab"><span>Sponsorship brands</span><span class="val" id="v-brands">8</span></div><input type="range" id="s-brands" min="1" max="25" value="8"></div>
+        <div class="ctrl"><div class="lab"><span>Price per package / season</span><span class="val" id="v-price">₹32L</span></div><input type="range" id="s-price" min="25" max="40" value="32"></div>
+        <h3 style="font-size:14px; margin:16px 0 4px; color:var(--accent-ink)">Surface B — ad-yield</h3>
+        <div class="ctrl"><div class="lab"><span>Advertisers optimized</span><span class="val" id="v-adv">16</span></div><input type="range" id="s-adv" min="1" max="38" value="16"></div>
+        <div class="ctrl"><div class="lab"><span>Avg spend / advertiser / season</span><span class="val" id="v-spend">₹2.0cr</span></div><input type="range" id="s-spend" min="10" max="30" value="20"></div>
+        <div class="ctrl"><div class="lab"><span>Fee rate on managed spend</span><span class="val" id="v-fee">9%</span></div><input type="range" id="s-fee" min="8" max="10" value="9"></div>
+        <div class="ctrl"><div class="lab"><span>Include one-time build (Year 1)</span><span class="val" id="v-build">Yes</span></div><input type="range" id="s-build" min="0" max="1" value="1"></div>
+      </div>
+
+      <div class="stack">
+        <div class="tiles">
+          <div class="tile hot"><div class="k">Net new profit · Season 1</div><div class="v" id="e-profit">&mdash;</div><div class="s" id="e-profit-s"></div></div>
+          <div class="tile"><div class="k">Implied margin</div><div class="v" id="e-margin">&mdash;</div><div class="s">fixed-cost engine</div></div>
+        </div>
+        <div class="card">
+          <p class="eyebrow">Season-1 P&amp;L</p>
+          <table class="econ" style="margin-top:10px">
+            <tbody id="pnl"></tbody>
+          </table>
+        </div>
+        <div class="callout small"><b>New money, not moved-around money:</b> these sponsorable leagues earn Dream11 only ~₹1.5L/season in ordinary ad revenue today. The sponsorship and optimization fees sit almost entirely on top of that.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row-between" style="margin-bottom:6px">
+        <div><p class="eyebrow">The compounding shape</p><h3 style="font-size:16px; margin-top:4px">Revenue climbs, cost barely moves</h3></div>
+        <div class="legendbar" style="align-items:center">
+          <span class="proof"><span style="width:11px;height:11px;border-radius:3px;background:var(--accent);display:inline-block"></span> Combined revenue</span>
+          <span class="proof"><span style="width:11px;height:11px;border-radius:3px;background:var(--teal);display:inline-block"></span> Net profit</span>
+        </div>
+      </div>
+      <p class="small muted" style="margin-bottom:10px">Season 1 is live from the model above. Seasons 2&ndash;3 are illustrative <span class="pill warn">assumption</span> &mdash; the point is the shape, not the exact figures.</p>
+      <div id="seasonchart" style="overflow-x:auto"></div>
+    </div>
+
+    <div class="callout warn">
+      <b>The scale check — say this first.</b> Dream11's monthly shortfall is ~₹12cr even in a good IPL month (₹38cr ads &minus; ₹50cr team cost), worse off-season. Even Season 3's full profit is smaller than one bad month's gap. That's true of <i>every</i> AI bet buildable in 24 weeks. What to claim: the highest-margin, fastest-compounding, most de-risked revenue line available &mdash; the first domino, not the whole answer.
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">Open questions to validate in the room</p>
+      <ol class="flow" style="margin-top:12px">
+        <li><span><b>How many real active private leagues exist, and typical size?</b> Replaces the biggest assumption in Surface A.</span></li>
+        <li><span><b>How many advertisers are on Dream11's own in-app inventory</b> (not IPL-wide)? Tightens Surface B.</span></li>
+        <li><span><b>At what advertiser count does this need a second engineer?</b> Tests the Season 2&ndash;3 cost line.</span></li>
+        <li><span><b>First of several bets, or the single swing for IPL 2027?</b> Decides how to frame the ask.</span></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <hr class="divider" style="margin-bottom:16px">
+  <div class="legendbar" style="margin-bottom:8px">
+    <span><span class="tagdot" style="background:var(--teal)"></span>Case fact</span>
+    <span><span class="tagdot" style="background:#3a7bd5"></span>Externally sourced</span>
+    <span><span class="tagdot" style="background:var(--gold)"></span>Assumption</span>
+    <span><span class="tagdot" style="background:var(--ink-3)"></span>Derived</span>
+  </div>
+  <p>Working demo of the Dream11 AI Commercial Engine PRD. League and advertiser data shown here is <b>synthetic and illustrative</b>; brand names (FinVest, PlayZone, etc.) are fictional stand-ins for brand archetypes. The scoring and optimization logic is real and runs in your browser. Economics defaults match the PRD's Season-1 case figures.</p>
+</footer>
+
+<script>
+/* ============================================================
+   Deterministic RNG so the demo is identical on every load
+   ============================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd = mulberry32(20270329);
+function pick(arr){return arr[Math.floor(rnd()*arr.length)];}
+function range(min,max){return min+rnd()*(max-min);}
+function irange(min,max){return Math.round(range(min,max));}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+/* ---------- Indian currency / number formatting ---------- */
+const nf = new Intl.NumberFormat('en-IN');
+function fmtCr(cr){ // cr in crore
+  if(cr>=1) return '₹'+cr.toFixed(cr<10?2:1)+'cr';
+  const l=cr*100; return '₹'+(l>=10?Math.round(l):l.toFixed(1))+'L';
+}
+function fmtReach(n){
+  if(n>=1e7) return (n/1e7).toFixed(2)+' cr';
+  if(n>=1e5) return (n/1e5).toFixed(1)+' L';
+  if(n>=1e3) return (n/1e3).toFixed(1)+'k';
+  return nf.format(Math.round(n));
+}
+
+/* ============================================================
+   DATA — synthetic leagues (Surface A population)
+   affinity dims: finance, youth, premium, gaming, food, mass
+   ============================================================ */
+const REGIONS=['Metro','T1','T2','T3'];
+const ARCHETYPES=[
+  {key:'corp',   label:'Corporate / office',  aff:{finance:.85,premium:.7,mass:.25,youth:.25,gaming:.15,food:.35}, size:[12,34], chat:[40,170], region:[.55,.3,.1,.05],
+    pre:['Infosys','Deloitte','HDFC','TCS','Wipro','KPMG','Accenture','ICICI','Flipkart HQ','Zerodha'], suf:['Finance XI','Audit Dream Team','Analysts','Q4 Legends','Boardroom Ballers','Ledger Lions']},
+  {key:'college',label:'College / hostel',    aff:{youth:.95,gaming:.6,mass:.5,food:.65,finance:.1,premium:.1}, size:[8,22], chat:[70,280], region:[.35,.4,.2,.05],
+    pre:['Hostel-7','IIT Powai','DU North','SRCC','VIT','NIT','Manipal','BITS Pilani','PG Block C','Wing-B'], suf:['Hitmen','Night Owls','Backbenchers','Smashers','Mess Mob','Canteen XI']},
+  {key:'trade',  label:'Trading / finance',   aff:{finance:.95,premium:.85,mass:.1,youth:.3,gaming:.1,food:.2}, size:[8,20], chat:[55,210], region:[.6,.3,.08,.02],
+    pre:['Dalal Street','NIFTY','Option','SIP','Crypto','Smallcap','Bull Run','Dividend'], suf:['Traders Guild','Alpha Seekers','Bulls','Compounders','Terminal XI']},
+  {key:'friends',label:'Friends / society',   aff:{mass:.8,food:.6,youth:.55,premium:.35,finance:.2,gaming:.3}, size:[5,15], chat:[18,110], region:[.4,.35,.2,.05],
+    pre:['Andheri','Koramangala','Sector 44','Baner','Salt Lake','Gachibowli','Indiranagar','Powai'], suf:['Boys','Chai Club','Sunday League','Society Stars','Galli Gang','Weekend XI']},
+  {key:'fan',    label:'Super-fans',          aff:{mass:.9,youth:.55,gaming:.45,food:.5,premium:.25,finance:.15}, size:[10,26], chat:[90,320], region:[.3,.35,.25,.1],
+    pre:['Yellove','Blue Tigers','Purple Army','Red Fort','Namma','Capital','Orange','Super Kings'], suf:['Fan Army','Diehards','Ultras','12th Man Club','Roar Squad']},
+  {key:'small',  label:'Small / casual',      aff:{mass:.6,food:.45,premium:.4,youth:.35,finance:.25,gaming:.2}, size:[5,11], chat:[8,60], region:[.3,.35,.25,.1],
+    pre:['The','Our','Just','Weekend','Family','Office','Cousins'], suf:['Casuals','Six','Playing XI','Crew','Squad','Gang']},
+];
+
+function makeLeague(i){
+  const a=pick(ARCHETYPES);
+  const aff={};
+  for(const d of ['finance','youth','premium','gaming','food','mass']){
+    aff[d]=clamp((a.aff[d]||0.1)+range(-.12,.12),0,1);
+  }
+  // weighted region
+  const r=rnd(); let acc=0, region='T3';
+  for(let k=0;k<REGIONS.length;k++){acc+=a.region[k]; if(r<=acc){region=REGIONS[k];break;}}
+  const weeks=rnd()<0.08?irange(0,2):irange(3,60); // ~8% cold-start
+  const consentR=rnd();
+  const consent = consentR<0.18?'opted':(consentR<0.9?'notasked':'declined');
+  return {
+    id:i, name:pick(a.pre)+' '+pick(a.suf), arche:a.label, archeKey:a.key,
+    size:irange(a.size[0],a.size[1]), chat:Math.round(range(a.chat[0],a.chat[1])),
+    region, weeks, aff, consent
+  };
+}
+const LEAGUES=Array.from({length:640},(_,i)=>makeLeague(i));
+
+/* ---------- Surface A brands (fictional archetypes) ---------- */
+const BRANDS=[
+  {id:'finvest', name:'FinVest', cat:'Investing app', emoji:'📈', color:'#0b7a63', c2:'#0e5f4f',
+    weights:{finance:1,premium:.7,youth:.45,mass:.2}, regionPref:{Metro:1,T1:.8,T2:.45,T3:.25}, tagline:'Draft smart. Invest smarter.', stickers:['📈','💹','🪙']},
+  {id:'luxepay', name:'Luxe Pay', cat:'Premium fintech', emoji:'💳', color:'#1f2430', c2:'#000',
+    weights:{premium:1,finance:.8,mass:.15,youth:.3}, regionPref:{Metro:1,T1:.7,T2:.3,T3:.12}, tagline:'For the top of the table.', stickers:['💳','👑','✨']},
+  {id:'learnladder', name:'LearnLadder', cat:'Ed-tech', emoji:'🎓', color:'#2b56c6', c2:'#1d3a8f',
+    weights:{youth:1,finance:.3,mass:.4,premium:.2}, regionPref:{Metro:.8,T1:1,T2:.7,T3:.4}, tagline:'Crack it like a captain.', stickers:['🎓','📚','🧠']},
+  {id:'playzone', name:'PlayZone', cat:'Mobile gaming', emoji:'🎮', color:'#7b2ff7', c2:'#5a1fb8',
+    weights:{gaming:1,youth:.9,mass:.5,food:.2}, regionPref:{Metro:.9,T1:1,T2:.8,T3:.6}, tagline:'Your squad. Your arena.', stickers:['🎮','🕹️','🔥']},
+  {id:'chargeup', name:'ChargeUp', cat:'Energy drink', emoji:'⚡', color:'#e8471c', c2:'#b8340f',
+    weights:{mass:1,youth:.7,gaming:.5,food:.5}, regionPref:{Metro:.8,T1:.9,T2:.9,T3:.8}, tagline:'Fuel every over.', stickers:['⚡','🥤','💥']},
+  {id:'quickbite', name:'QuickBite', cat:'Food delivery', emoji:'🍔', color:'#e23744', c2:'#b51f2b',
+    weights:{food:1,mass:.75,youth:.65,premium:.3}, regionPref:{Metro:1,T1:.9,T2:.7,T3:.4}, tagline:'Match-night cravings, sorted.', stickers:['🍔','🍕','🥤']},
+];
+
+/* ============================================================
+   ENGINE — league brand-fit scoring
+   ============================================================ */
+function scoreLeague(l, brand){
+  let num=0, den=0;
+  for(const d in brand.weights){ num+=brand.weights[d]*(l.aff[d]||0); den+=brand.weights[d]; }
+  const affinity=den?num/den:0;                                   // 0..1
+  const engagement=clamp(Math.log10(l.chat+1)/Math.log10(321),0,1);
+  const size=clamp((l.size-5)/(32-5),0,1);
+  const region=brand.regionPref[l.region]??0.3;
+  const base=0.40*affinity+0.25*engagement+0.20*size+0.15*region;
+  const cold=l.weeks>=2?1:0.4;
+  return {score:Math.round(100*base*cold), affinity,engagement,size,region, cold:l.weeks<2};
+}
+
+function buildCohort(brand, thresh){
+  const scored=LEAGUES
+    .filter(l=>l.consent!=='declined')
+    .map(l=>({l, ...scoreLeague(l,brand)}))
+    .sort((a,b)=>b.score-a.score);
+  const cohort=scored.filter(s=>s.score>=thresh).slice(0,500);
+  const members=cohort.reduce((s,x)=>s+x.l.size,0);
+  const avgSize=cohort.length?members/cohort.length:0;
+  const avgScore=cohort.length?cohort.reduce((s,x)=>s+x.score,0)/cohort.length:0;
+  const opted=cohort.filter(x=>x.l.consent==='opted').length;
+  return {scored, cohort, members, avgSize, avgScore, opted};
+}
+
+/* ============================================================
+   DATA + ENGINE — Surface B ad-yield
+   ============================================================ */
+const CREATORS=['@powerplay_pandit','@cover_drive','@sixmachine','@pitch_report','@the12thman','@fantasy_guru'];
+const SEGMENTS=['Metro M 25-34','Metro F 25-34','Tier-2 Youth 18-24','High-Spender','Casual Weekend','Hardcore Fantasy'];
+const MOMENTS=['Powerplay','Middle Overs','Death Overs','Strategic Timeout','Fall of Wicket','Innings Break','Post-Match'];
+
+// stable structural factors (seeded once)
+const creatorF = CREATORS.map(()=>range(0.82,1.32));
+const segmentF = {'Metro M 25-34':1.0,'Metro F 25-34':0.95,'Tier-2 Youth 18-24':0.9,'High-Spender':1.35,'Casual Weekend':0.8,'Hardcore Fantasy':1.25};
+const momentF  = {'Powerplay':1.05,'Middle Overs':0.82,'Death Overs':1.4,'Strategic Timeout':1.15,'Fall of Wicket':1.2,'Innings Break':0.95,'Post-Match':0.88};
+
+const ADVERTISERS=[
+  {id:'quickbite', name:'QuickBite', cat:'Food delivery', emoji:'🍔', seg:'Casual Weekend', base:2.4},
+  {id:'luxepay',   name:'Luxe Pay',  cat:'Premium fintech', emoji:'💳', seg:'High-Spender', base:2.9},
+  {id:'playzone',  name:'PlayZone',  cat:'Mobile gaming', emoji:'🎮', seg:'Hardcore Fantasy', base:2.6},
+  {id:'chargeup',  name:'ChargeUp',  cat:'Energy drink', emoji:'⚡', seg:'Tier-2 Youth 18-24', base:2.2},
+  {id:'drivenow',  name:'DriveNow',  cat:'Ride-hailing', emoji:'🚕', seg:'Metro M 25-34', base:2.3},
+];
+// per-advertiser noise grid, seeded & stored
+const advNoise={};
+for(const adv of ADVERTISERS){
+  advNoise[adv.id]=CREATORS.map(()=>SEGMENTS.map(()=>MOMENTS.map(()=>range(0.88,1.12))));
+}
+function roas(adv,ci,si,mi){
+  const seg=SEGMENTS[si], mom=MOMENTS[mi];
+  let v=adv.base*creatorF[ci]*segmentF[seg]*momentF[mom]*advNoise[adv.id][ci][si][mi];
+  if(seg===adv.seg) v*=1.18; // advertiser's sweet-spot segment
+  return v;
+}
+function analyzeAdv(adv){
+  const combos=[];
+  for(let c=0;c<CREATORS.length;c++)for(let s=0;s<SEGMENTS.length;s++)for(let m=0;m<MOMENTS.length;m++){
+    combos.push({c,s,m,creator:CREATORS[c],segment:SEGMENTS[s],moment:MOMENTS[m],roas:roas(adv,c,s,m)});
+  }
+  combos.sort((a,b)=>b.roas-a.roas);
+  const curROAS=combos.reduce((s,x)=>s+x.roas,0)/combos.length;       // legacy even spread
+  const top=combos.slice(0,12);                                       // concentrate budget into best 12
+  const optROAS=top.reduce((s,x)=>s+x.roas,0)/top.length;
+  // heatmap: best creator value per segment×moment
+  const grid=SEGMENTS.map((_,s)=>MOMENTS.map((_,m)=>{
+    let best=0; for(let c=0;c<CREATORS.length;c++) best=Math.max(best,roas(adv,c,s,m)); return best;
+  }));
+  let lo=Infinity,hi=-Infinity;
+  grid.forEach(r=>r.forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v);}));
+  return {combos, curROAS, optROAS, lift:(optROAS-curROAS)/curROAS, recs:combos.slice(0,3), grid, lo, hi};
+}
+
+/* ============================================================
+   RENDER — Surface A
+   ============================================================ */
+let A={brandId:'finvest', thresh:60, live:false, consentBoost:0};
+const $=id=>document.getElementById(id);
+
+function renderBrandChips(){
+  $('brandchips').innerHTML=BRANDS.map(b=>`
+    <button class="chip" role="button" aria-pressed="${b.id===A.brandId}" data-brand="${b.id}">
+      <span class="swatch" style="background:${b.color}"></span>${b.emoji} ${b.name}
+      <span class="muted small" style="font-weight:500">· ${b.cat}</span>
+    </button>`).join('');
+  $('a-pop').textContent=nf.format(LEAGUES.length);
+}
+
+function renderSurfaceA(){
+  const brand=BRANDS.find(b=>b.id===A.brandId);
+  const res=buildCohort(brand, A.thresh);
+  // league list (top 8 of full scored, show whether in cohort)
+  const top=res.scored.slice(0,8);
+  $('leaguelist').innerHTML=top.map((x,i)=>{
+    const inc=x.score>=A.thresh;
+    const consentPill=x.l.consent==='opted'?'<span class="pill green">opted-in</span>':(x.l.consent==='notasked'?'<span class="pill">consent pending</span>':'');
+    return `<div class="lrow">
+      <div class="rank">${i+1}</div>
+      <div style="min-width:0">
+        <div class="lname">${x.l.name} ${x.l.cold?'<span class="pill warn">ramping &lt;2wk</span>':''} ${consentPill}</div>
+        <div class="lmeta"><span>${x.l.arche}</span><span>${x.l.size} players</span><span>${x.l.chat} msgs/matchday</span><span>${x.l.region}</span></div>
+        <div class="bars" title="affinity · engagement · size · region">
+          <div class="barseg"><i style="width:${Math.round(x.affinity*100)}%"></i></div>
+          <div class="barseg"><i style="width:${Math.round(x.engagement*100)}%"></i></div>
+          <div class="barseg"><i style="width:${Math.round(x.size*100)}%"></i></div>
+          <div class="barseg"><i style="width:${Math.round(x.region*100)}%"></i></div>
+        </div>
+      </div>
+      <div class="scorebadge" style="color:${inc?'var(--teal)':'var(--ink-3)'}">${x.score}</div>
+    </div>`;
+  }).join('');
+
+  // cohort tiles
+  $('cohort-title').textContent=`${brand.name} · ${brand.cat} cohort`;
+  $('cohort-tiles').innerHTML=`
+    <div class="tile"><div class="k">Leagues matched</div><div class="v num">${nf.format(res.cohort.length)}</div><div class="s">fit ≥ ${A.thresh}</div></div>
+    <div class="tile"><div class="k">Reach (members)</div><div class="v">${fmtReach(res.members)}</div><div class="s">avg ${res.avgSize.toFixed(0)}/league</div></div>
+    <div class="tile"><div class="k">Avg fit score</div><div class="v num">${res.avgScore.toFixed(0)}</div><div class="s">out of 100</div></div>`;
+
+  // creative
+  $('creative').innerHTML=`
+    <div class="skin" style="background:linear-gradient(135deg,${brand.color},${brand.c2})">
+      <div class="tag">${brand.emoji} ${brand.name} presents</div>
+      <h4>${brand.tagline}</h4>
+      <div class="foot"><span>League skin · ${brand.cat}</span><span>matchday overlay</span></div>
+    </div>
+    <div style="margin-top:12px"><p class="small muted" style="margin-bottom:6px">Chat stickers</p>
+    <div class="stickers">${brand.stickers.map(s=>`<div class="sticker">${s}</div>`).join('')}
+      <div class="sticker" style="background:${brand.color}; color:#fff; border:0">${brand.emoji}</div></div></div>
+    <p class="small muted" style="margin-top:12px"><span class="pill warn">human review</span> Brand-safety check required before go-live.</p>`;
+
+  renderConsent(res, brand);
+  // reset live state when inputs change
+  if(!A.live){ $('branddash').innerHTML='<p class="muted small" style="padding:20px 0; text-align:center">Go live to populate the brand’s live dashboard.</p>'; }
+  A._res=res; A._brand=brand;
+}
+
+function renderConsent(res, brand){
+  const total=res.cohort.length||1;
+  const opted=Math.min(total, res.opted+A.consentBoost);
+  const pct=Math.round(opted/total*100);
+  $('consent').innerHTML=`
+    <div class="row-between"><span class="small"><b>${nf.format(opted)}</b> of ${nf.format(total)} admins opted in</span><span class="pill ${pct>=60?'green':'warn'}">${pct}% consented</span></div>
+    <div class="track" style="margin-top:8px"><i style="width:${pct}%; background:var(--teal)"></i></div>
+    <p class="small muted" style="margin-top:8px">${A.consentBoost?'Consent requests sent — admins opted in.':'Only opted-in admins are activated. The rest stay untouched.'}</p>`;
+  $('golive').disabled = pct<50;
+}
+
+function goLive(){
+  A.live=true;
+  const res=A._res, brand=A._brand;
+  const reach=res.members;
+  const matchdays=16, freq=3.2;
+  const impressions=Math.round(reach*matchdays*freq);
+  const engRate=range(6.5,9.5);
+  const stickerUses=Math.round(impressions*engRate/100*0.12);
+  const lift=range(11,19);
+  $('branddash').innerHTML=`
+    <div class="tiles">
+      <div class="tile hot"><div class="k">Impressions · season</div><div class="v">${fmtReach(impressions)}</div><div class="s">${matchdays} matchdays</div></div>
+      <div class="tile"><div class="k">Engagement rate</div><div class="v num">${engRate.toFixed(1)}%</div><div class="s">skin + sticker taps</div></div>
+      <div class="tile"><div class="k">Sticker uses</div><div class="v">${fmtReach(stickerUses)}</div><div class="s">in-league shares</div></div>
+      <div class="tile"><div class="k">Est. brand-recall lift</div><div class="v num">+${lift.toFixed(0)}%</div><div class="s">vs. standard ad slot</div></div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Live for <b>${brand.name}</b> across ${nf.format(res.cohort.length)} ${brand.cat.toLowerCase()} leagues. Members' day-to-day league experience is unchanged.</p>`;
+  $('golive').textContent='● Live';
+  document.getElementById('branddash').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ============================================================
+   RENDER — Surface B
+   ============================================================ */
+let B={advId:'quickbite'};
+function renderAdvChips(){
+  $('advchips').innerHTML=ADVERTISERS.map(a=>`
+    <button class="chip" aria-pressed="${a.id===B.advId}" data-adv="${a.id}">${a.emoji} ${a.name}
+    <span class="muted small" style="font-weight:500">· ${a.cat}</span></button>`).join('');
+}
+function heatColor(v,lo,hi){
+  const t=clamp((v-lo)/(hi-lo||1),0,1);
+  // sequential teal-green ramp, light -> dark
+  const L=92-t*58, C=t*0.14+0.02, H=168;
+  return `oklch(${L}% ${C} ${H})`;
+}
+function renderSurfaceB(){
+  const adv=ADVERTISERS.find(a=>a.id===B.advId);
+  const r=analyzeAdv(adv);
+  $('b-cur').textContent=r.curROAS.toFixed(2)+'×';
+  $('b-opt').textContent=r.optROAS.toFixed(2)+'×';
+  $('b-lift').textContent='+'+Math.round(r.lift*100)+'%';
+  const spendCr = 2.0; // illustrative avg spend per advertiser
+  $('b-inc').textContent=fmtCr(spendCr*(r.optROAS-r.curROAS));
+
+  // heatmap grid: header row + segment rows
+  const cols=MOMENTS.length;
+  let html=`<div class="heat" style="grid-template-columns:120px repeat(${cols},1fr)">`;
+  html+=`<div></div>`+MOMENTS.map(m=>`<div class="hhead">${m}</div>`).join('');
+  SEGMENTS.forEach((seg,si)=>{
+    html+=`<div class="hrow-label">${seg}</div>`;
+    MOMENTS.forEach((_,mi)=>{
+      const v=r.grid[si][mi];
+      const light=(v-r.lo)/((r.hi-r.lo)||1)<0.5;
+      html+=`<div class="hcell" title="${seg} · ${MOMENTS[mi]} — ${v.toFixed(2)}× ROAS" style="background:${heatColor(v,r.lo,r.hi)}; color:${light?'#0c2b27':'#eafff8'}">${v.toFixed(1)}</div>`;
+    });
+  });
+  html+=`</div>`;
+  $('heatmap').innerHTML=html;
+  $('heatscale').style.background=`linear-gradient(90deg, ${heatColor(r.lo,r.lo,r.hi)}, ${heatColor(r.hi,r.lo,r.hi)})`;
+
+  // recommendations
+  $('recs').innerHTML=r.recs.map((x,i)=>`
+    <div class="rec">
+      <div class="idx">${i+1}</div>
+      <div style="min-width:0">
+        <div style="font-weight:700; font-size:13.5px">${x.creator} &times; ${x.segment}</div>
+        <div class="small muted" style="margin-top:2px">during <b>${x.moment}</b> · projected <b style="color:var(--teal)">${x.roas.toFixed(2)}×</b> ROAS</div>
+      </div>
+    </div>`).join('');
+
+  // before/after bars
+  const maxR=Math.max(r.optROAS,r.curROAS);
+  $('beforeafter').innerHTML=`
+    <div class="grid g2">
+      <div>
+        <div class="row-between small"><span class="muted">Before — even spread</span><b class="num">${r.curROAS.toFixed(2)}× ROAS</b></div>
+        <div class="track" style="height:14px; margin-top:6px"><i style="width:${r.curROAS/maxR*100}%; background:var(--ink-3)"></i></div>
+      </div>
+      <div>
+        <div class="row-between small"><span class="muted">After — engine reallocation</span><b class="num" style="color:var(--teal)">${r.optROAS.toFixed(2)}× ROAS</b></div>
+        <div class="track" style="height:14px; margin-top:6px"><i style="width:${r.optROAS/maxR*100}%; background:var(--teal)"></i></div>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Same budget, reallocated toward the best creator &times; segment &times; moment combinations &mdash; a <b>+${Math.round(r.lift*100)}%</b> yield lift the brand sees on its own dashboard.</p>`;
+}
+
+/* ============================================================
+   ECONOMICS
+   ============================================================ */
+function computeEcon(){
+  const brands=+$('s-brands').value;
+  const priceL=+$('s-price').value;         // ₹ lakh per package
+  const adv=+$('s-adv').value;
+  const spendL=+$('s-spend').value;         // ₹ lakh? stored as *10 -> actually 10..30 means 1.0..3.0 cr
+  const spendCr=spendL/10;                  // 20 -> 2.0cr
+  const feePct=+$('s-fee').value;
+  const includeBuild=+$('s-build').value===1;
+
+  const surfA = brands*priceL/100;                 // cr  (price in L)
+  const surfB = adv*spendCr*(feePct/100);          // cr
+  const combined = surfA+surfB;
+  const runCr = 0.126;                             // ₹12.6L season running cost
+  const buildCr = includeBuild?0.166:0;            // ₹16.6L one-time
+  const net = combined-runCr-buildCr;
+  const margin = combined>0?net/combined*100:0;
+  return {brands,priceL,adv,spendCr,feePct,includeBuild,surfA,surfB,combined,runCr,buildCr,net,margin};
+}
+function renderEcon(){
+  const e=computeEcon();
+  $('v-brands').textContent=e.brands;
+  $('v-price').textContent='₹'+e.priceL+'L';
+  $('v-adv').textContent=e.adv;
+  $('v-spend').textContent='₹'+e.spendCr.toFixed(1)+'cr';
+  $('v-fee').textContent=e.feePct+'%';
+  $('v-build').textContent=e.includeBuild?'Yes':'No';
+
+  $('e-profit').textContent=fmtCr(e.net);
+  $('e-profit-s').textContent=(e.includeBuild?'after ₹16.6L build':'build amortized');
+  $('e-margin').textContent=Math.round(e.margin)+'%';
+
+  $('pnl').innerHTML=`
+    <tr><td>Surface A — sponsorships (${e.brands} brands × ₹${e.priceL}L)</td><td>${fmtCr(e.surfA)}</td></tr>
+    <tr><td>Surface B — ad-yield (${e.adv} advertisers × ₹${e.spendCr.toFixed(1)}cr × ${e.feePct}%)</td><td>${fmtCr(e.surfB)}</td></tr>
+    <tr><td><b>Combined revenue</b></td><td>${fmtCr(e.combined)}</td></tr>
+    <tr><td>Less: season running cost</td><td>−${fmtCr(e.runCr)}</td></tr>
+    <tr><td>Less: one-time build${e.includeBuild?' (Year 1)':''}</td><td>−${fmtCr(e.buildCr)}</td></tr>
+    <tr class="total"><td>Net new profit · Season 1</td><td>${fmtCr(e.net)}</td></tr>`;
+
+  renderSeasonChart(e);
+}
+
+function renderSeasonChart(e){
+  // Season 1 = live model; Seasons 2-3 illustrative midpoints from PRD
+  const data=[
+    {label:'Season 1', rev:e.combined, profit:e.net, tag:''},
+    {label:'Season 2', rev:11.5, profit:11.3, tag:'illustrative'},
+    {label:'Season 3', rev:17.0, profit:16.8, tag:'illustrative'},
+  ];
+  const W=640,H=240, padL=40,padB=38,padT=12,padR=12;
+  const maxV=Math.max(...data.map(d=>Math.max(d.rev,d.profit)),8)*1.1;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const gw=plotW/data.length;
+  const bw=Math.min(34,gw*0.3);
+  const y=v=>padT+plotH-(v/maxV)*plotH;
+  let g='';
+  for(let t=0;t<=4;t++){const gv=maxV*t/4; const yy=y(gv);
+    g+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="var(--line)" stroke-width="1"/>`;
+    g+=`<text x="${padL-6}" y="${yy+4}" text-anchor="end" font-size="10">${gv.toFixed(0)}</text>`;
+  }
+  data.forEach((d,i)=>{
+    const cx=padL+gw*i+gw/2;
+    const x1=cx-bw-3, x2=cx+3;
+    g+=`<rect x="${x1}" y="${y(d.rev)}" width="${bw}" height="${padT+plotH-y(d.rev)}" rx="4" fill="var(--accent)"/>`;
+    g+=`<rect x="${x2}" y="${y(d.profit)}" width="${bw}" height="${padT+plotH-y(d.profit)}" rx="4" fill="var(--teal)"/>`;
+    g+=`<text x="${cx}" y="${H-padB+16}" text-anchor="middle" font-size="11" font-weight="600">${d.label}</text>`;
+    if(d.tag) g+=`<text x="${cx}" y="${H-padB+28}" text-anchor="middle" font-size="9" fill="var(--gold)">${d.tag}</text>`;
+    g+=`<text x="${x1+bw/2}" y="${y(d.rev)-5}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--accent-ink)">${d.rev<10?d.rev.toFixed(1):d.rev.toFixed(0)}</text>`;
+    g+=`<text x="${x2+bw/2}" y="${y(d.profit)-5}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">${d.profit<10?d.profit.toFixed(1):d.profit.toFixed(0)}</text>`;
+  });
+  $('seasonchart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px; display:block" role="img" aria-label="Combined revenue and net profit across three seasons, in crore">
+    <text x="${padL-30}" y="${padT+plotH/2}" transform="rotate(-90 ${padL-30} ${padT+plotH/2})" text-anchor="middle" font-size="9" fill="var(--ink-3)">₹ crore</text>
+    ${g}</svg>`;
+}
+
+/* ============================================================
+   NAV + WIRING
+   ============================================================ */
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>{
+    const on=t.dataset.tab===name; t.setAttribute('aria-selected', on?'true':'false');
+  });
+  ['overview','surface-a','surface-b','economics'].forEach(id=>{ $(id).hidden = id!==name; });
+  const sec=$(name); sec.classList.remove('fade'); void sec.offsetWidth; sec.classList.add('fade');
+  window.scrollTo(0,0);
+  try{location.hash=name;}catch(e){}
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab'); if(b) showTab(b.dataset.tab);});
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.goto)));
+
+$('brandchips').addEventListener('click',e=>{const b=e.target.closest('[data-brand]'); if(!b)return;
+  A.brandId=b.dataset.brand; A.live=false; A.consentBoost=0; $('golive').textContent='Pass brand-safety & go live';
+  renderBrandChips(); renderSurfaceA();});
+$('thresh').addEventListener('input',e=>{A.thresh=+e.target.value; $('threshv').textContent=e.target.value; A.live=false; A.consentBoost=0; $('golive').textContent='Pass brand-safety & go live'; renderSurfaceA();});
+$('requestconsent').addEventListener('click',()=>{A.consentBoost=9999; renderConsent(A._res,A._brand);});
+$('golive').addEventListener('click',goLive);
+
+$('advchips').addEventListener('click',e=>{const b=e.target.closest('[data-adv]'); if(!b)return; B.advId=b.dataset.adv; renderAdvChips(); renderSurfaceB();});
+
+['s-brands','s-price','s-adv','s-spend','s-fee','s-build'].forEach(id=>$(id).addEventListener('input',renderEcon));
+
+/* theme toggle */
+(function(){
+  const root=document.documentElement; let saved=null;
+  try{saved=localStorage.getItem('d11theme');}catch(e){}
+  if(saved) root.setAttribute('data-theme',saved);
+  $('theme').addEventListener('click',()=>{
+    const cur=root.getAttribute('data-theme');
+    const sysDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+    const next = cur? (cur==='dark'?'light':'dark') : (sysDark?'light':'dark');
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('d11theme',next);}catch(e){}
+    if($('economics') && !$('economics').hidden) renderEcon(); // redraw svg text colors
+  });
+})();
+
+/* init */
+renderBrandChips(); renderSurfaceA();
+renderAdvChips(); renderSurfaceB();
+renderEcon();
+(function(){ const h=(location.hash||'').replace('#',''); if(['surface-a','surface-b','economics'].includes(h)) showTab(h); })();
+</script>
