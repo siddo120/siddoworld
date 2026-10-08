@@ -5,6 +5,13 @@ Commercial Engine — PRD & Unit Economics."* It is **one AI matching/optimizati
 engine driving two revenue surfaces**, plus the unit-economics model that makes the
 case to the CFO.
 
+It is grounded in how the **real Dream11 app** looks and flows (its red identity,
+the private-league/Groups screen with a live leaderboard and chat, the match-centre
+and bottom-nav). Surface A renders the sponsor skin **inside a working Dream11
+app mockup** with a sponsor on/off toggle and the in-app admin consent prompt — so
+the PRD's core promise ("monetize private leagues without changing the experience")
+is shown, not just asserted.
+
 Everything runs client-side in a single file — open `index.html` in any browser.
 No build step, no server, no dependencies.
 
@@ -31,6 +38,10 @@ protects private leagues (the asset Community said users won't give up).
 
 The matching and optimization logic actually runs — it is not a slideshow:
 
+- **In-app proof** — Surface A shows the auto-generated sponsor skin live inside a
+  Dream11 private-league screen (`appScreenMarkup`). Toggle the sponsor off and the
+  leaderboard, chat and gameplay are byte-for-byte identical; accept the in-app
+  consent bottom sheet to go live.
 - **League scoring** (`scoreLeague`) ranks a population of 640 synthetic private
   leagues on brand-fit from four weighted signals — **affinity (0.40) · engagement
   (0.25) · size (0.20) · region (0.15)** — with a cold-start discount for leagues

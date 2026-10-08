@@ -17,9 +17,9 @@
     --ink-2:#5c5349;
     --ink-3:#8a7f72;
     --line:#e3ddd2;
-    --accent:#d7263d;
-    --accent-ink:#8c1526;
-    --accent-soft:#fbe4e7;
+    --accent:#e8152e;
+    --accent-ink:#b00020;
+    --accent-soft:#fde6e9;
     --teal:#1b998b;
     --teal-soft:#dcf1ee;
     --gold:#c98a12;
@@ -36,7 +36,7 @@
   }
   @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
     --bg:#161311; --surface:#211d1a; --surface-2:#2b2622; --ink:#f4efe8;
-    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff5869;
+    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff4d5e;
     --accent-ink:#ff8a95; --accent-soft:#3a1e22; --teal:#39c3b2; --teal-soft:#15332f;
     --gold:#e3af4b; --good:#54c178; --warn:#e3af4b; --bad:#ef6a5a;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
@@ -44,7 +44,7 @@
   }}
   :root[data-theme="dark"]{
     --bg:#161311; --surface:#211d1a; --surface-2:#2b2622; --ink:#f4efe8;
-    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff5869;
+    --ink-2:#c3b8aa; --ink-3:#938779; --line:#3a332d; --accent:#ff4d5e;
     --accent-ink:#ff8a95; --accent-soft:#3a1e22; --teal:#39c3b2; --teal-soft:#15332f;
     --gold:#e3af4b; --good:#54c178; --warn:#e3af4b; --bad:#ef6a5a;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
@@ -221,6 +221,68 @@
   svg text{fill:var(--ink-2)}
   :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   @media (prefers-reduced-motion:no-preference){ .fade{animation:f .3s ease both} @keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1}} }
+
+  /* ---------- Dream11 app phone mockup ---------- */
+  .phone{width:300px; max-width:100%; background:#0b0b0d; border-radius:36px; padding:9px; box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 0 0 2px #26262b; flex:none}
+  .pf-screen{background:#f3f3f5; border-radius:28px; overflow:hidden; position:relative; height:648px; display:flex; flex-direction:column; color:#17171a}
+  .pf-notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0b0b0d; border-radius:0 0 14px 14px; z-index:9}
+  .pf-status{display:flex; justify-content:space-between; align-items:center; padding:7px 18px 3px; font-size:11px; font-weight:700; color:#17171a; font-family:var(--f-body)}
+  .pf-top{background:linear-gradient(120deg,var(--d-c1,#e8152e),var(--d-c2,#b00020)); color:#fff; padding:10px 14px 12px}
+  .pf-top .row{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .pf-logo{font-family:var(--f-display); font-weight:800; font-size:16px; letter-spacing:-.02em; display:flex; align-items:center; gap:6px}
+  .pf-logo .mk{background:#fff; color:var(--d-c1,#e8152e); width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-size:13px}
+  .pf-wallet{background:rgba(255,255,255,.18); border-radius:999px; padding:4px 10px; font-size:11px; font-weight:700; display:flex; align-items:center; gap:5px}
+  .pf-sponsorline{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; opacity:.92; margin-top:7px; display:flex; align-items:center; gap:6px}
+  .pf-body{flex:1; overflow:hidden; display:flex; flex-direction:column; gap:8px; padding:10px}
+  .pf-card{background:#fff; border-radius:12px; padding:11px; box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  .pf-lg-head{display:flex; align-items:center; justify-content:space-between}
+  .pf-lg-head b{font-size:13px; font-weight:800}
+  .pf-chip{font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:999px; background:#f0eef0; color:#5c5560}
+  .pf-match{display:flex; align-items:center; justify-content:center; gap:10px; margin:9px 0 2px}
+  .pf-team{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:700}
+  .pf-crest{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:11px; font-weight:800; font-family:var(--f-display)}
+  .pf-vs{font-size:10px; font-weight:800; color:#9a929e}
+  .pf-lb-row{display:grid; grid-template-columns:20px 1fr auto; gap:8px; align-items:center; padding:5px 0; border-top:1px solid #efedf0; font-size:11.5px}
+  .pf-lb-row:first-child{border-top:0}
+  .pf-rank{font-weight:800; color:#9a929e; text-align:center; font-size:11px}
+  .pf-ava{width:22px; height:22px; border-radius:50%; background:#e7e4e9; display:grid; place-items:center; font-size:9.5px; font-weight:800; color:#6b6470}
+  .pf-pts{font-weight:800; font-variant-numeric:tabular-nums}
+  .pf-me{background:var(--d-soft,#fde6e9)!important; border-radius:8px; padding-left:6px; padding-right:6px}
+  .pf-banner{border-radius:12px; padding:11px 12px; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:8px; background:linear-gradient(120deg,var(--d-c1,#e8152e),var(--d-c2,#b00020))}
+  .pf-banner .t{font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; opacity:.9}
+  .pf-banner h5{font-size:13px; margin:2px 0 0; font-family:var(--f-display); font-weight:800; color:#fff}
+  .pf-banner .cta{background:#fff; color:var(--d-c1,#e8152e); font-size:10px; font-weight:800; padding:6px 10px; border-radius:8px; flex:none}
+  .pf-chatline{display:flex; gap:7px; align-items:flex-end; margin-top:2px}
+  .pf-bub{background:#f0eef0; border-radius:12px 12px 12px 3px; padding:6px 9px; font-size:10.5px; max-width:78%}
+  .pf-bub .who{font-size:8.5px; font-weight:800; color:#8a8290; display:block; margin-bottom:1px}
+  .pf-stk{width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-size:16px; border:1px solid #efedf0; background:#fff; flex:none}
+  .pf-nav{display:flex; justify-content:space-around; align-items:center; background:#fff; border-top:1px solid #eceaee; padding:7px 4px 9px}
+  .pf-nav div{display:flex; flex-direction:column; align-items:center; gap:2px; font-size:8.5px; font-weight:700; color:#9a929e}
+  .pf-nav div.on{color:var(--d-c1,#e8152e)}
+  .pf-nav .ic{font-size:15px}
+  .pf-plain .pf-top{background:linear-gradient(120deg,#e8152e,#b00020)}
+  .phone-wrap{display:flex; flex-direction:column; align-items:center; gap:12px}
+  .toggle{display:inline-flex; align-items:center; gap:9px; font-size:12.5px; font-weight:700; cursor:pointer}
+  .toggle .sw{width:40px; height:23px; border-radius:999px; background:var(--surface-2); position:relative; transition:background .18s; flex:none; border:1px solid var(--line)}
+  .toggle .sw i{position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:left .18s}
+  .toggle[aria-pressed="true"] .sw{background:var(--accent); border-color:var(--accent)}
+  .toggle[aria-pressed="true"] .sw i{left:20px}
+
+  /* consent bottom sheet (in-app) */
+  .sheet-scrim{position:absolute; inset:0; background:rgba(10,10,12,.5); display:flex; align-items:flex-end; z-index:20; opacity:0; pointer-events:none; transition:opacity .22s}
+  .sheet-scrim.open{opacity:1; pointer-events:auto}
+  .sheet{background:#fff; width:100%; border-radius:18px 18px 0 0; padding:16px 15px calc(14px + env(safe-area-inset-bottom,0px)); transform:translateY(102%); transition:transform .26s cubic-bezier(.2,.8,.2,1); color:#17171a}
+  .sheet-scrim.open .sheet{transform:translateY(0)}
+  .sheet .grab{width:38px; height:4px; border-radius:3px; background:#dcd9df; margin:0 auto 12px}
+  .sheet h4{font-size:15px; margin-bottom:3px}
+  .sheet .yn{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:7px 0}
+  .sheet .ynbox{border-radius:10px; padding:9px 10px; font-size:11px}
+  .sheet .ynbox.yes{background:#eafaf0; border:1px solid #cdeedb}
+  .sheet .ynbox.no{background:#f4f2f5; border:1px solid #e7e4e9}
+  .sheet .ynbox b{font-size:10px; display:block; margin-bottom:3px; text-transform:uppercase; letter-spacing:.05em}
+  .sheet .acts{display:flex; gap:9px; margin-top:12px}
+  .sheet .acts button{flex:1; border-radius:10px; padding:11px; font-size:13px; font-weight:800; cursor:pointer; border:1px solid #e7e4e9; background:#fff; color:#17171a}
+  .sheet .acts button.go{background:var(--d-c1,#e8152e); border-color:var(--d-c1,#e8152e); color:#fff}
 </style>
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -248,10 +310,18 @@
 <main>
   <!-- ========================= OVERVIEW ========================= -->
   <section id="overview" class="stack fade">
-    <div>
-      <p class="eyebrow">Mock client call · Round 2 · Dream11</p>
-      <h1 style="font-size:clamp(28px,5vw,40px); margin:8px 0 10px; max-width:16ch">Finishing the bet you already won.</h1>
-      <p class="lede" style="font-size:16px">You already proved an AI-led, legal, no-stakes product earns <b>2.5&times; the normal ad rate</b> in a pilot &mdash; and never scaled it. This is one matching engine feeding two income lines: private-league sponsorships, and ad-yield optimization for the advertisers you already have.</p>
+    <div class="grid" style="grid-template-columns:1fr; gap:22px; align-items:center">
+      <div class="grid g2" style="align-items:center">
+        <div>
+          <p class="eyebrow">Mock client call · Round 2 · Dream11</p>
+          <h1 style="font-size:clamp(28px,5vw,40px); margin:8px 0 10px; max-width:16ch">Finishing the bet you already won.</h1>
+          <p class="lede" style="font-size:16px">You already proved an AI-led, legal, no-stakes product earns <b>2.5&times; the normal ad rate</b> in a pilot &mdash; and never scaled it. This is one matching engine feeding two income lines: private-league sponsorships, and ad-yield optimization for the advertisers you already have.</p>
+          <p class="small muted" style="margin-top:12px">The screen on the right is a Dream11 private league with a sponsor skin live &mdash; same leaderboard, same chat, same gameplay. Only the look changes.</p>
+        </div>
+        <div style="display:flex; justify-content:center">
+          <div class="phone"><div class="pf-screen" id="hero-phone"></div></div>
+        </div>
+      </div>
     </div>
 
     <div class="tiles t4">
@@ -355,34 +425,40 @@
     </div>
 
     <div class="grid g2">
-      <div class="card">
-        <p class="eyebrow">Step 3 · the sellable cohort</p>
-        <h3 style="font-size:16px; margin:6px 0 2px" id="cohort-title">&mdash;</h3>
-        <p class="small muted" style="margin-bottom:12px">Matching leagues are bundled into one brand-fit cohort (a package sold for a season). Up to ~500 similar leagues per package.</p>
-        <div class="tiles" id="cohort-tiles"></div>
-      </div>
-      <div class="card">
-        <p class="eyebrow">Step 4 · auto-generated creative</p>
-        <p class="small muted" style="margin:6px 0 12px">Generated per brand per cohort &mdash; league skin, chat stickers, matchday graphic. A human reviews for brand safety before anything goes live.</p>
-        <div id="creative"></div>
-      </div>
-    </div>
-
-    <div class="grid g2">
-      <div class="card">
-        <p class="eyebrow">Step 5 · opt-in consent</p>
-        <p class="small muted" style="margin:6px 0 12px">Nothing changes in a league without the admin's consent. New consent is captured here &mdash; no legacy data is used.</p>
-        <div id="consent"></div>
-        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-          <button class="btn" id="requestconsent">Request consent from cohort</button>
-          <button class="btn primary" id="golive" disabled>Pass brand-safety &amp; go live</button>
+      <div class="stack">
+        <div class="card">
+          <p class="eyebrow">Step 3 · the sellable cohort</p>
+          <h3 style="font-size:16px; margin:6px 0 2px" id="cohort-title">&mdash;</h3>
+          <p class="small muted" style="margin-bottom:12px">Matching leagues are bundled into one brand-fit cohort (a package sold for a season). Up to ~500 similar leagues per package.</p>
+          <div class="tiles" id="cohort-tiles"></div>
+        </div>
+        <div class="card">
+          <p class="eyebrow">Step 5 · opt-in consent</p>
+          <p class="small muted" style="margin:6px 0 12px">Nothing changes in a league without the admin's consent, captured in-app (tap <b>Show admin consent prompt</b> &rarr;). No legacy data is used.</p>
+          <div id="consent"></div>
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+            <button class="btn" id="requestconsent">Request consent from cohort</button>
+            <button class="btn primary" id="golive" disabled>Pass brand-safety &amp; go live</button>
+          </div>
         </div>
       </div>
       <div class="card">
-        <p class="eyebrow">Step 6 · brand performance dashboard</p>
-        <p class="small muted" style="margin:6px 0 12px">What the sponsoring brand sees once the campaign is live.</p>
-        <div id="branddash"><p class="muted small" style="padding:20px 0; text-align:center">Go live to populate the brand's live dashboard.</p></div>
+        <p class="eyebrow">Step 4 · inside the Dream11 app</p>
+        <p class="small muted" style="margin:6px 0 0">Auto-generated skin, stickers and matchday banner &mdash; shown live in a members' private-league screen. Toggle the sponsor off: the leaderboard, chat and gameplay are identical.</p>
+        <div class="phone-wrap" style="margin-top:14px">
+          <div class="phone"><div class="pf-screen" id="app-phone"></div></div>
+          <div style="display:flex; gap:18px; flex-wrap:wrap; justify-content:center; align-items:center">
+            <button class="toggle" id="sponsortoggle" aria-pressed="true"><span class="sw"><i></i></span> Sponsor skin</button>
+            <button class="btn" id="openconsent">Show admin consent prompt</button>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">Step 6 · brand performance dashboard</p>
+      <p class="small muted" style="margin:6px 0 12px">What the sponsoring brand sees once the campaign is live.</p>
+      <div id="branddash"><p class="muted small" style="padding:20px 0; text-align:center">Accept the in-app consent prompt or press go-live to populate the brand's live dashboard.</p></div>
     </div>
 
     <div class="callout"><b>Where it breaks (flagged, not hidden):</b> brand-new leagues can't be scored for ~2 weeks until chat history builds. Scoring thousands of leagues at once on the busiest match nights is the one real engineering challenge.</div>
@@ -674,8 +750,85 @@ function analyzeAdv(adv){
 /* ============================================================
    RENDER — Surface A
    ============================================================ */
-let A={brandId:'finvest', thresh:60, live:false, consentBoost:0};
+let A={brandId:'finvest', thresh:60, live:false, consentBoost:0, sponsored:true};
 const $=id=>document.getElementById(id);
+
+/* ---------- Dream11 app private-league screen ---------- */
+const CTA={finvest:'Start a SIP',luxepay:'Get Luxe Pay',learnladder:'Claim free class',playzone:'Play now',chargeup:'Grab a ChargeUp',quickbite:'Order now'};
+const LB=[
+  {r:1,n:'Rohit K.',t:"Rohit's XI",p:842,me:false},
+  {r:2,n:'You',t:'Dugout Dons',p:814,me:true},
+  {r:3,n:'Priya S.',t:'Cover Drive',p:791,me:false},
+  {r:4,n:'Arjun M.',t:'Yorker Gang',p:770,me:false},
+  {r:5,n:'Neha R.',t:'Spin Kings',p:712,me:false},
+];
+function initials(n){return n==='You'?'You':n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function appScreenMarkup(brand, sponsored, withSheet){
+  const c1=sponsored?brand.color:'#e8152e', c2=sponsored?brand.c2:'#b00020';
+  const lb=LB.map(m=>`<div class="pf-lb-row ${m.me?'pf-me':''}">
+      <span class="pf-rank">${m.r}</span>
+      <span style="display:flex; align-items:center; gap:7px; min-width:0"><span class="pf-ava">${initials(m.n)}</span>
+        <span style="min-width:0"><b style="display:block">${m.n}</b><span style="font-size:9.5px; color:#9a929e">${m.t}</span></span></span>
+      <span class="pf-pts">${m.p}</span></div>`).join('');
+  const stickers=(sponsored?brand.stickers:['🏏','🔥','🎯']).slice(0,3).map(s=>`<div class="pf-stk">${s}</div>`).join('')
+    + (sponsored?`<div class="pf-stk" style="background:linear-gradient(135deg,${c1},${c2}); color:#fff; border:0">${brand.emoji}</div>`:'');
+  const banner=sponsored
+    ? `<div class="pf-banner"><div><div class="t">${brand.emoji} ${brand.name}</div><h5>${brand.tagline}</h5></div><div class="cta" style="color:${c1}">${CTA[brand.id]||'Learn more'}</div></div>`
+    : `<div class="pf-banner"><div><div class="t">🏆 Mega Contest</div><h5>₹2 Crore &middot; Entry ₹49</h5></div><div class="cta">Join</div></div>`;
+  const sheet=withSheet?`
+    <div class="sheet-scrim" id="consentScrim">
+      <div class="sheet">
+        <div class="grab"></div>
+        <div style="display:flex; gap:11px; align-items:center; margin-bottom:10px">
+          <div style="width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:20px; background:linear-gradient(135deg,${brand.color},${brand.c2}); color:#fff; flex:none">${brand.emoji}</div>
+          <div><h4>${brand.name} wants to sponsor Andheri Smashers</h4><p style="font-size:11px; color:#6b6470">You're the league admin &middot; season-long</p></div>
+        </div>
+        <div class="yn">
+          <div class="ynbox yes"><b>✓ What changes</b>A ${brand.name} league skin, chat stickers and a matchday banner.</div>
+          <div class="ynbox no"><b>✕ What doesn't</b>Points, ranks, prizes, members, your team — nothing.</div>
+        </div>
+        <div class="acts"><button id="sheetNo">Not now</button><button class="go" id="sheetYes" style="background:linear-gradient(135deg,${brand.color},${brand.c2}); border-color:${brand.c2}">Accept sponsorship</button></div>
+      </div>
+    </div>`:'';
+  return `<div class="pf-notch"></div>
+    <div class="pf-status"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679; &nbsp;5G &nbsp;&#9632;</span></div>
+    <div class="pf-top">
+      <div class="row"><div class="pf-logo"><span class="mk">D</span>Dream11</div><div class="pf-wallet">&#8377; 1,240</div></div>
+      ${sponsored?`<div class="pf-sponsorline">${brand.emoji} Presented by ${brand.name}</div>`:`<div class="pf-sponsorline" style="opacity:.8">Private League &middot; Match Day 14</div>`}
+    </div>
+    <div class="pf-body">
+      <div class="pf-card">
+        <div class="pf-lg-head"><b>Andheri Smashers</b><span class="pf-chip">12 members</span></div>
+        <div class="pf-match">
+          <div class="pf-team"><span class="pf-crest" style="background:#f9cd05; color:#1b1714">CSK</span>Chennai</div>
+          <span class="pf-vs">VS</span>
+          <div class="pf-team"><span class="pf-crest" style="background:#045093">MI</span>Mumbai</div>
+        </div>
+        <div style="text-align:center; font-size:9.5px; color:#9a929e; font-weight:700">T20 &middot; Today 7:30 PM &middot; 2nd innings live</div>
+      </div>
+      ${banner}
+      <div class="pf-card">
+        <div class="pf-lg-head" style="margin-bottom:2px"><b style="font-size:11px">Leaderboard</b><span class="pf-chip">Live</span></div>
+        ${lb}
+      </div>
+      <div class="pf-card">
+        <div class="pf-chatline"><div class="pf-bub"><span class="who">Rohit K.</span>Captain change before lock! 🧢</div></div>
+        <div class="pf-chatline" style="justify-content:flex-end; margin-top:6px"><div class="pf-bub" style="background:${sponsored?'color-mix(in srgb,'+c1+' 16%,#fff)':'#fde6e9'}; border-radius:12px 12px 3px 12px">Locked Bumrah 🔥</div></div>
+        <div class="stickers" style="display:flex; gap:7px; margin-top:8px">${stickers}</div>
+      </div>
+    </div>
+    <div class="pf-nav">
+      <div><span class="ic">🏠</span>Home</div><div><span class="ic">🏏</span>My Matches</div>
+      <div class="on"><span class="ic">👥</span>Groups</div><div><span class="ic">🏆</span>Winners</div><div><span class="ic">☰</span>More</div>
+    </div>${sheet}`;
+}
+function renderAppScreen(elId, brand, sponsored, withSheet){
+  const el=$(elId); if(!el) return;
+  el.style.setProperty('--d-c1', sponsored?brand.color:'#e8152e');
+  el.style.setProperty('--d-c2', sponsored?brand.c2:'#b00020');
+  el.style.setProperty('--d-soft', `color-mix(in srgb, ${sponsored?brand.color:'#e8152e'} 14%, #fff)`);
+  el.innerHTML = appScreenMarkup(brand, sponsored, withSheet);
+}
 
 function renderBrandChips(){
   $('brandchips').innerHTML=BRANDS.map(b=>`
@@ -717,18 +870,8 @@ function renderSurfaceA(){
     <div class="tile"><div class="k">Reach (members)</div><div class="v">${fmtReach(res.members)}</div><div class="s">avg ${res.avgSize.toFixed(0)}/league</div></div>
     <div class="tile"><div class="k">Avg fit score</div><div class="v num">${res.avgScore.toFixed(0)}</div><div class="s">out of 100</div></div>`;
 
-  // creative
-  $('creative').innerHTML=`
-    <div class="skin" style="background:linear-gradient(135deg,${brand.color},${brand.c2})">
-      <div class="tag">${brand.emoji} ${brand.name} presents</div>
-      <h4>${brand.tagline}</h4>
-      <div class="foot"><span>League skin · ${brand.cat}</span><span>matchday overlay</span></div>
-    </div>
-    <div style="margin-top:12px"><p class="small muted" style="margin-bottom:6px">Chat stickers</p>
-    <div class="stickers">${brand.stickers.map(s=>`<div class="sticker">${s}</div>`).join('')}
-      <div class="sticker" style="background:${brand.color}; color:#fff; border:0">${brand.emoji}</div></div></div>
-    <p class="small muted" style="margin-top:12px"><span class="pill warn">human review</span> Brand-safety check required before go-live.</p>`;
-
+  // in-app experience (the real Dream11 private-league screen with the sponsor skin)
+  renderAppScreen('app-phone', brand, A.sponsored, true);
   renderConsent(res, brand);
   // reset live state when inputs change
   if(!A.live){ $('branddash').innerHTML='<p class="muted small" style="padding:20px 0; text-align:center">Go live to populate the brand’s live dashboard.</p>'; }
@@ -932,6 +1075,23 @@ $('brandchips').addEventListener('click',e=>{const b=e.target.closest('[data-bra
 $('thresh').addEventListener('input',e=>{A.thresh=+e.target.value; $('threshv').textContent=e.target.value; A.live=false; A.consentBoost=0; $('golive').textContent='Pass brand-safety & go live'; renderSurfaceA();});
 $('requestconsent').addEventListener('click',()=>{A.consentBoost=9999; renderConsent(A._res,A._brand);});
 $('golive').addEventListener('click',goLive);
+$('sponsortoggle').addEventListener('click',()=>{
+  A.sponsored=!A.sponsored;
+  $('sponsortoggle').setAttribute('aria-pressed', A.sponsored?'true':'false');
+  renderAppScreen('app-phone', A._brand, A.sponsored, true);
+});
+$('openconsent').addEventListener('click',()=>{const s=$('consentScrim'); if(s) s.classList.add('open');});
+$('app-phone').addEventListener('click',e=>{
+  const scrim=$('consentScrim');
+  if(e.target.id==='sheetNo' || e.target===scrim){ if(scrim) scrim.classList.remove('open'); return; }
+  if(e.target.id==='sheetYes'){
+    A.sponsored=true; A.consentBoost=9999;
+    $('sponsortoggle').setAttribute('aria-pressed','true');
+    renderAppScreen('app-phone', A._brand, true, true);
+    renderConsent(A._res, A._brand);
+    goLive();
+  }
+});
 
 $('advchips').addEventListener('click',e=>{const b=e.target.closest('[data-adv]'); if(!b)return; B.advId=b.dataset.adv; renderAdvChips(); renderSurfaceB();});
 
@@ -953,6 +1113,7 @@ $('advchips').addEventListener('click',e=>{const b=e.target.closest('[data-adv]'
 })();
 
 /* init */
+renderAppScreen('hero-phone', BRANDS.find(b=>b.id==='chargeup'), true, false);
 renderBrandChips(); renderSurfaceA();
 renderAdvChips(); renderSurfaceB();
 renderEcon();
